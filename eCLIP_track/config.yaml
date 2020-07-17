@@ -1,0 +1,811 @@
+PROJECT_DIR: /home/dengw1/workspace/eCLIP
+SCRIPTS_DIR: /home/dengw1/workspace/snakerun
+SUMMARY: eCLIP_All_Gene_v15_protrude.pdf
+# SUMMARY: repetitive_region_composition.pdf
+CONFIG: /home/dengw1/workspace/snakerun/eCLIP/config.yaml
+
+genome: hg19
+hg19:
+  rmask: /home/dengw1/workspace/genome/raw/hg19/hg19_RNA_rep.bed
+  star_idx: /home/dengw1/workspace/genome/star/hg19
+  gtf: /home/dengw1/workspace/genome/raw/hg19/hg19.gtf
+  fasta: /home/dengw1/workspace/genome/raw/hg19/hg19.fasta
+  kallisto_idx: /home/dengw1/workspace/genome/star/hg19/kallisto_index
+  t2g: /home/dengw1/workspace/genome/raw/hg19/t2g.txt
+  gene_name: /home/dengw1/workspace/genome/raw/hg19/ensg_gn.txt
+  repetitive: ['/home/dengw1/workspace/genome/raw/hg19/hg19_repetitive.bed','/home/dengw1/workspace/genome/raw/hg19/hg19_alu.bed',
+              '/home/dengw1/workspace/genome/raw/hg19/hg19_l1.bed','/home/dengw1/workspace/genome/raw/hg19/hg19_l2.bed','/home/dengw1/workspace/genome/raw/hg19/hg19_l3.bed',
+              '/home/dengw1/workspace/genome/raw/hg19/hg19_ltr.bed','/home/dengw1/workspace/genome/raw/hg19/hg19_mer.bed','/home/dengw1/workspace/genome/raw/hg19/hg19_mir.bed',
+              '/home/dengw1/workspace/genome/raw/hg19/hg19_others.bed']
+  alu_repetitive: 'hg19_alu.bed'
+  binding_score: '/home/dengw1/workspace/eCLIP/binding_score/hg19_chrom_without_conservation_integral_prediction'
+  chr_size: '/home/dengw1/workspace/genome/raw/hg19/chr_size.txt'
+genomic_region:
+  gene: /home/dengw1/workspace/genome/raw/hg19/genomic_region_300/genes.bed
+  non_coding: /mnt/isilon/xing_lab/dengw1/genome/raw/hg19/genomic_region_300/non_coding.bed
+  cds: /mnt/isilon/xing_lab/dengw1/genome/raw/hg19/genomic_region_300/cds.bed
+  5UTR: /mnt/isilon/xing_lab/dengw1/genome/raw/hg19/genomic_region_300/5UTRs.bed
+  3UTR: /mnt/isilon/xing_lab/dengw1/genome/raw/hg19/genomic_region_300/3UTRs.bed
+  up_proximal: /mnt/isilon/xing_lab/dengw1/genome/raw/hg19/genomic_region_300/up_proximal_sorted_merged_splitted.bed
+  down_proximal: /mnt/isilon/xing_lab/dengw1/genome/raw/hg19/genomic_region_300/down_proximal_sorted_merged_splitted.bed
+  distal: /mnt/isilon/xing_lab/dengw1/genome/raw/hg19/genomic_region_300/distal_introns.bed
+  tmp_dir: /home/dengw1/workspace/eCLIP/tmp
+  strandness: False
+read_length: 50
+# Mutation analysis related parameters
+to_plot_group: ['K562_ILF3','K562_HNRNPC','K562_UPF1','K562_XRCC6','K562_LIN28B','HepG2_ILF3','HepG2_HNRNPC','HepG2_UPF1','HepG2_XRCC6','HepG2_LIN28B']
+re_intersect_clinvar: False
+clinvar_vcf: /home/dengw1/workspace/public_data/ClinVar/chr_clinvar_20191111.vcf
+source_vcf: /mnt/isilon/xing_lab/dengw1/public_data/TCGA/mutation
+tcga_prj: ['ACC','BLCA','BRCA','CESC','CHOL','COAD','DLBC','ESCA','GBM','HNSC','KICH','KIRC','KIRP','LAML','LGG','LIHC','LUAD','LUSC','MESO',
+           'OV','PAAD','PCPG','PRAD','READ','SARC','SKCM','STAD','TGCT','THCA','THYM','UCEC','UCS','UVM']
+vcf_file_info: /mnt/isilon/xing_lab/dengw1/public_data/TCGA/vcf_file_info.json
+clinical_data: /mnt/isilon/xing_lab/dengw1/public_data/TCGA/clinical
+# tcga_prj: ['BLCA','BRCA','CESC','CHOL','COAD','DLBC','ESCA','GBM','HNSC','KICH','PCPG','KIRC','KIRP','LAML','PRAD','READ','LGG','SARC','LIHC','SKCM']
+samples: 
+  ['K562_SERBP1_Inp_rep1','K562_SERBP1_IP_rep1','K562_SERBP1_IP_rep2','HepG2_ZC3H11A_Inp_rep1','HepG2_ZC3H11A_IP_rep1','HepG2_ZC3H11A_IP_rep2','HepG2_NKRF_Inp_rep1',
+'HepG2_NKRF_IP_rep1','HepG2_NKRF_IP_rep2','HepG2_U2AF2_Inp_rep1','HepG2_U2AF2_IP_rep1','HepG2_U2AF2_IP_rep2','HepG2_FASTKD2_Inp_rep1','HepG2_FASTKD2_IP_rep1',
+'HepG2_FASTKD2_IP_rep2','K562_GNL3_Inp_rep1','K562_GNL3_IP_rep1','K562_GNL3_IP_rep2','HepG2_ILF3_Inp_rep1','HepG2_ILF3_IP_rep1','HepG2_ILF3_IP_rep2',
+'HepG2_TRA2A_Inp_rep1','HepG2_TRA2A_IP_rep1','HepG2_TRA2A_IP_rep2','HepG2_HNRNPA1_Inp_rep1','HepG2_HNRNPA1_IP_rep1','HepG2_HNRNPA1_IP_rep2','K562_UTP18_Inp_rep1',
+'K562_UTP18_IP_rep1','K562_UTP18_IP_rep2','K562_DDX6_Inp_rep1','K562_DDX6_IP_rep1','K562_DDX6_IP_rep2','K562_RBFOX2_Inp_rep1','K562_RBFOX2_IP_rep1',
+'K562_RBFOX2_IP_rep2','K562_FASTKD2_Inp_rep1','K562_FASTKD2_IP_rep1','K562_FASTKD2_IP_rep2','HepG2_LARP7_Inp_rep1','HepG2_LARP7_IP_rep1','HepG2_LARP7_IP_rep2',
+'K562_EIF3G_Inp_rep1','K562_EIF3G_IP_rep1','K562_EIF3G_IP_rep2','HepG2_LARP4_Inp_rep1','HepG2_LARP4_IP_rep1','HepG2_LARP4_IP_rep2','K562_KHDRBS1_Inp_rep1',
+'K562_KHDRBS1_IP_rep1','K562_KHDRBS1_IP_rep2','K562_XRCC6_Inp_rep1','K562_XRCC6_IP_rep1','K562_XRCC6_IP_rep2','HepG2_AQR_Inp_rep1','HepG2_AQR_IP_rep1',
+'HepG2_AQR_IP_rep2','HepG2_AGGF1_Inp_rep1','HepG2_AGGF1_IP_rep1','HepG2_AGGF1_IP_rep2','K562_PTBP1_Inp_rep1','K562_PTBP1_IP_rep1','K562_PTBP1_IP_rep2',
+'K562_GPKOW_Inp_rep1','K562_GPKOW_IP_rep1','K562_GPKOW_IP_rep2','K562_SAFB2_Inp_rep1','K562_SAFB2_IP_rep1','K562_SAFB2_IP_rep2','HepG2_FAM120A_Inp_rep1',
+'HepG2_FAM120A_IP_rep1','HepG2_FAM120A_IP_rep2','HepG2_SLTM_Inp_rep1','HepG2_SLTM_IP_rep1','HepG2_SLTM_IP_rep2','K562_ZRANB2_Inp_rep1','K562_ZRANB2_IP_rep1',
+'K562_ZRANB2_IP_rep2','K562_DDX3X_Inp_rep1','K562_DDX3X_IP_rep1','K562_DDX3X_IP_rep2','K562_CPEB4_Inp_rep1','K562_CPEB4_IP_rep1','K562_CPEB4_IP_rep2',
+'HepG2_NOL12_Inp_rep1','HepG2_NOL12_IP_rep1','HepG2_NOL12_IP_rep2','HepG2_FXR2_Inp_rep1','HepG2_FXR2_IP_rep1','HepG2_FXR2_IP_rep2','K562_RPS11_Inp_rep1',
+'K562_RPS11_IP_rep1','K562_RPS11_IP_rep2','K562_YBX3_Inp_rep1','K562_YBX3_IP_rep1','K562_YBX3_IP_rep2','HepG2_UPF1_Inp_rep1','HepG2_UPF1_IP_rep1',
+'HepG2_UPF1_IP_rep2','K562_EXOSC5_Inp_rep1','K562_EXOSC5_IP_rep1','K562_EXOSC5_IP_rep2','HepG2_TAF15_Inp_rep1','HepG2_TAF15_IP_rep1','HepG2_TAF15_IP_rep2',
+'K562_SRSF1_Inp_rep1','K562_SRSF1_IP_rep1','K562_SRSF1_IP_rep2','HepG2_TBRG4_Inp_rep1','HepG2_TBRG4_IP_rep1','HepG2_TBRG4_IP_rep2','K562_SRSF7_Inp_rep1',
+'K562_SRSF7_IP_rep1','K562_SRSF7_IP_rep2','HepG2_TIAL1_Inp_rep1','HepG2_TIAL1_IP_rep1','HepG2_TIAL1_IP_rep2','HepG2_DKC1_Inp_rep1','HepG2_DKC1_IP_rep1',
+'HepG2_DKC1_IP_rep2','K562_DDX24_Inp_rep1','K562_DDX24_IP_rep1','K562_DDX24_IP_rep2','K562_DDX21_Inp_rep1','K562_DDX21_IP_rep1','K562_DDX21_IP_rep2',
+'HepG2_GRWD1_Inp_rep1','HepG2_GRWD1_IP_rep1','HepG2_GRWD1_IP_rep2','K562_SUPV3L1_Inp_rep1','K562_SUPV3L1_IP_rep1','K562_SUPV3L1_IP_rep2','K562_TROVE2_Inp_rep1',
+'K562_TROVE2_IP_rep1','K562_TROVE2_IP_rep2','HepG2_IGF2BP3_Inp_rep1','HepG2_IGF2BP3_IP_rep1','HepG2_IGF2BP3_IP_rep2','HepG2_IGF2BP1_Inp_rep1','HepG2_IGF2BP1_IP_rep1',
+'HepG2_IGF2BP1_IP_rep2','HepG2_MATR3_Inp_rep1','HepG2_MATR3_IP_rep1','HepG2_MATR3_IP_rep2','K562_SF3B1_Inp_rep1','K562_SF3B1_IP_rep1','K562_SF3B1_IP_rep2',
+'HepG2_PABPN1_Inp_rep1','HepG2_PABPN1_IP_rep1','HepG2_PABPN1_IP_rep2','K562_LSM11_Inp_rep1','K562_LSM11_IP_rep1','K562_LSM11_IP_rep2','HepG2_UCHL5_Inp_rep1',
+'HepG2_UCHL5_IP_rep1','HepG2_UCHL5_IP_rep2','K562_SSB_Inp_rep1','K562_SSB_IP_rep1','K562_SSB_IP_rep2','HepG2_SAFB_Inp_rep1','HepG2_SAFB_IP_rep1',
+'HepG2_SAFB_IP_rep2','HepG2_TROVE2_Inp_rep1','HepG2_TROVE2_IP_rep1','HepG2_TROVE2_IP_rep2','HepG2_BCLAF1_Inp_rep1','HepG2_BCLAF1_IP_rep1','HepG2_BCLAF1_IP_rep2',
+'K562_SMNDC1_Inp_rep1','K562_SMNDC1_IP_rep1','K562_SMNDC1_IP_rep2','HepG2_KHSRP_Inp_rep1','HepG2_KHSRP_IP_rep1','HepG2_KHSRP_IP_rep2','HepG2_STAU2_Inp_rep1',
+'HepG2_STAU2_IP_rep1','HepG2_STAU2_IP_rep2','HepG2_AKAP1_Inp_rep1','HepG2_AKAP1_IP_rep1','HepG2_AKAP1_IP_rep2','K562_UCHL5_Inp_rep1','K562_UCHL5_IP_rep1',
+'K562_UCHL5_IP_rep2','HepG2_SF3A3_Inp_rep1','HepG2_SF3A3_IP_rep1','HepG2_SF3A3_IP_rep2','K562_TARDBP_Inp_rep1','K562_TARDBP_IP_rep1','K562_TARDBP_IP_rep2',
+'K562_HNRNPM_Inp_rep1','K562_HNRNPM_IP_rep1','K562_HNRNPM_IP_rep2','HepG2_YBX3_Inp_rep1','HepG2_YBX3_IP_rep1','HepG2_YBX3_IP_rep2','K562_NIPBL_Inp_rep1',
+'K562_NIPBL_IP_rep1','K562_NIPBL_IP_rep2','HepG2_HLTF_Inp_rep1','HepG2_HLTF_IP_rep1','HepG2_HLTF_IP_rep2','K562_FAM120A_Inp_rep1','K562_FAM120A_IP_rep1',
+'K562_FAM120A_IP_rep2','K562_SF3B4_Inp_rep1','K562_SF3B4_IP_rep1','K562_SF3B4_IP_rep2','K562_U2AF2_Inp_rep1','K562_U2AF2_IP_rep1','K562_U2AF2_IP_rep2',
+'K562_U2AF1_Inp_rep1','K562_U2AF1_IP_rep1','K562_U2AF1_IP_rep2','HepG2_HNRNPU_Inp_rep1','HepG2_HNRNPU_IP_rep1','HepG2_HNRNPU_IP_rep2','K562_QKI_Inp_rep1',
+'K562_QKI_IP_rep1','K562_QKI_IP_rep2','K562_AGGF1_Inp_rep1','K562_AGGF1_IP_rep1','K562_AGGF1_IP_rep2','HepG2_PRPF8_Inp_rep1','HepG2_PRPF8_IP_rep1',
+'HepG2_PRPF8_IP_rep2','K562_ZNF622_Inp_rep1','K562_ZNF622_IP_rep1','K562_ZNF622_IP_rep2','HepG2_PRPF4_Inp_rep1','HepG2_PRPF4_IP_rep1','HepG2_PRPF4_IP_rep2',
+'HepG2_WDR43_Inp_rep1','HepG2_WDR43_IP_rep1','HepG2_WDR43_IP_rep2','HepG2_FKBP4_Inp_rep1','HepG2_FKBP4_IP_rep1','HepG2_FKBP4_IP_rep2','K562_DROSHA_Inp_rep1',
+'K562_DROSHA_IP_rep1','K562_DROSHA_IP_rep2','HepG2_SUB1_Inp_rep1','HepG2_SUB1_IP_rep1','HepG2_SUB1_IP_rep2','HepG2_SRSF1_Inp_rep1','HepG2_SRSF1_IP_rep1',
+'HepG2_SRSF1_IP_rep2','HepG2_CSTF2_Inp_rep1','HepG2_CSTF2_IP_rep1','HepG2_CSTF2_IP_rep2','HepG2_SRSF7_Inp_rep1','HepG2_SRSF7_IP_rep1','HepG2_SRSF7_IP_rep2',
+'HepG2_HNRNPC_Inp_rep1','HepG2_HNRNPC_IP_rep1','HepG2_HNRNPC_IP_rep2','HepG2_POLR2G_Inp_rep1','HepG2_POLR2G_IP_rep1','HepG2_POLR2G_IP_rep2','HepG2_HNRNPM_Inp_rep1',
+'HepG2_HNRNPM_IP_rep1','HepG2_HNRNPM_IP_rep2','HepG2_HNRNPL_Inp_rep1','HepG2_HNRNPL_IP_rep1','HepG2_HNRNPL_IP_rep2','HepG2_SRSF9_Inp_rep1','HepG2_SRSF9_IP_rep1',
+'HepG2_SRSF9_IP_rep2','HepG2_FTO_Inp_rep1','HepG2_FTO_IP_rep1','HepG2_FTO_IP_rep2','HepG2_HNRNPK_Inp_rep1','HepG2_HNRNPK_IP_rep1','HepG2_HNRNPK_IP_rep2',
+'K562_PRPF8_Inp_rep1','K562_PRPF8_IP_rep1','K562_PRPF8_IP_rep2','K562_SBDS_Inp_rep1','K562_SBDS_IP_rep1','K562_SBDS_IP_rep2','K562_XRN2_Inp_rep1',
+'K562_XRN2_IP_rep1','K562_XRN2_IP_rep2','HepG2_NOLC1_Inp_rep1','HepG2_NOLC1_IP_rep1','HepG2_NOLC1_IP_rep2','K562_RPS3_Inp_rep1','K562_RPS3_IP_rep1',
+'K562_RPS3_IP_rep2','K562_APOBEC3C_Inp_rep1','K562_APOBEC3C_IP_rep1','K562_APOBEC3C_IP_rep2','HepG2_EFTUD2_Inp_rep1','HepG2_EFTUD2_IP_rep1','HepG2_EFTUD2_IP_rep2',
+'K562_HLTF_Inp_rep1','K562_HLTF_IP_rep1','K562_HLTF_IP_rep2','K562_GTF2F1_Inp_rep1','K562_GTF2F1_IP_rep1','K562_GTF2F1_IP_rep2','K562_FXR2_Inp_rep1',
+'K562_FXR2_IP_rep1','K562_FXR2_IP_rep2','HepG2_XRCC6_Inp_rep1','HepG2_XRCC6_IP_rep1','HepG2_XRCC6_IP_rep2','K562_AATF_Inp_rep1','K562_AATF_IP_rep1',
+'K562_AATF_IP_rep2','K562_RBM15_Inp_rep1','K562_RBM15_IP_rep1','K562_RBM15_IP_rep2','HepG2_SDAD1_Inp_rep1','HepG2_SDAD1_IP_rep1','HepG2_SDAD1_IP_rep2',
+'HepG2_FUS_Inp_rep1','HepG2_FUS_IP_rep1','HepG2_FUS_IP_rep2','HepG2_EIF3H_Inp_rep1','HepG2_EIF3H_IP_rep1','HepG2_EIF3H_IP_rep2','K562_PPIL4_Inp_rep1',
+'K562_PPIL4_IP_rep1','K562_PPIL4_IP_rep2','K562_SND1_Inp_rep1','K562_SND1_IP_rep1','K562_SND1_IP_rep2','HepG2_GRSF1_Inp_rep1','HepG2_GRSF1_IP_rep1',
+'HepG2_GRSF1_IP_rep2','HepG2_GTF2F1_Inp_rep1','HepG2_GTF2F1_IP_rep1','HepG2_GTF2F1_IP_rep2','HepG2_SFPQ_Inp_rep1','HepG2_SFPQ_IP_rep1','HepG2_SFPQ_IP_rep2',
+'HepG2_SF3B4_Inp_rep1','HepG2_SF3B4_IP_rep1','HepG2_SF3B4_IP_rep2','K562_WDR43_Inp_rep1','K562_WDR43_IP_rep1','K562_WDR43_IP_rep2','K562_FXR1_Inp_rep1',
+'K562_FXR1_IP_rep1','K562_FXR1_IP_rep2','K562_PCBP1_Inp_rep1','K562_PCBP1_IP_rep1','K562_PCBP1_IP_rep2','K562_HNRNPUL1_Inp_rep1','K562_HNRNPUL1_IP_rep1',
+'K562_HNRNPUL1_IP_rep2','K562_DDX42_Inp_rep1','K562_DDX42_IP_rep1','K562_DDX42_IP_rep2','HepG2_FUBP3_Inp_rep1','HepG2_FUBP3_IP_rep1','HepG2_FUBP3_IP_rep2',
+'K562_FUS_Inp_rep1','K562_FUS_IP_rep1','K562_FUS_IP_rep2','K562_NPM1_Inp_rep1','K562_NPM1_IP_rep1','K562_NPM1_IP_rep2','HepG2_SND1_Inp_rep1',
+'HepG2_SND1_IP_rep1','HepG2_SND1_IP_rep2','HepG2_RBM15_Inp_rep1','HepG2_RBM15_IP_rep1','HepG2_RBM15_IP_rep2','K562_PHF6_Inp_rep1','K562_PHF6_IP_rep1',
+'K562_PHF6_IP_rep2','K562_EWSR1_Inp_rep1','K562_EWSR1_IP_rep1','K562_EWSR1_IP_rep2','K562_HNRNPA1_Inp_rep1','K562_HNRNPA1_IP_rep1','K562_HNRNPA1_IP_rep2',
+'K562_HNRNPU_Inp_rep1','K562_HNRNPU_IP_rep1','K562_HNRNPU_IP_rep2','HepG2_DDX59_Inp_rep1','HepG2_DDX59_IP_rep1','HepG2_DDX59_IP_rep2','K562_HNRNPK_Inp_rep1',
+'K562_HNRNPK_IP_rep1','K562_HNRNPK_IP_rep2','K562_CPSF6_Inp_rep1','K562_CPSF6_IP_rep1','K562_CPSF6_IP_rep2','K562_HNRNPL_Inp_rep1','K562_HNRNPL_IP_rep1',
+'K562_HNRNPL_IP_rep2','K562_GEMIN5_Inp_rep1','K562_GEMIN5_IP_rep1','K562_GEMIN5_IP_rep2','K562_HNRNPC_Inp_rep1','K562_HNRNPC_IP_rep1','K562_HNRNPC_IP_rep2',
+'K562_RBM22_Inp_rep1','K562_RBM22_IP_rep1','K562_RBM22_IP_rep2','HepG2_DDX52_Inp_rep1','HepG2_DDX52_IP_rep1','HepG2_DDX52_IP_rep2','HepG2_DDX55_Inp_rep1',
+'HepG2_DDX55_IP_rep1','HepG2_DDX55_IP_rep2','HepG2_G3BP1_Inp_rep1','HepG2_G3BP1_IP_rep1','HepG2_G3BP1_IP_rep2','HepG2_DHX30_Inp_rep1','HepG2_DHX30_IP_rep1',
+'HepG2_DHX30_IP_rep2','K562_NCBP2_Inp_rep1','K562_NCBP2_IP_rep1','K562_NCBP2_IP_rep2','K562_TIA1_Inp_rep1','K562_TIA1_IP_rep1','K562_TIA1_IP_rep2',
+'HepG2_SUPV3L1_Inp_rep1','HepG2_SUPV3L1_IP_rep1','HepG2_SUPV3L1_IP_rep2','HepG2_U2AF1_Inp_rep1','HepG2_U2AF1_IP_rep1','HepG2_U2AF1_IP_rep2','HepG2_NCBP2_Inp_rep1',
+'HepG2_NCBP2_IP_rep1','HepG2_NCBP2_IP_rep2','K562_NOLC1_Inp_rep1','K562_NOLC1_IP_rep1','K562_NOLC1_IP_rep2','HepG2_DROSHA_Inp_rep1','HepG2_DROSHA_IP_rep1',
+'HepG2_DROSHA_IP_rep2','HepG2_DDX6_Inp_rep1','HepG2_DDX6_IP_rep1','HepG2_DDX6_IP_rep2','HepG2_RBM22_Inp_rep1','HepG2_RBM22_IP_rep1','HepG2_RBM22_IP_rep2',
+'HepG2_ZNF800_Inp_rep1','HepG2_ZNF800_IP_rep1','HepG2_ZNF800_IP_rep2','HepG2_EXOSC5_Inp_rep1','HepG2_EXOSC5_IP_rep1','HepG2_EXOSC5_IP_rep2','K562_YWHAG_Inp_rep1',
+'K562_YWHAG_IP_rep1','K562_YWHAG_IP_rep2','K562_WDR3_Inp_rep1','K562_WDR3_IP_rep1','K562_WDR3_IP_rep2','K562_AARS_Inp_rep1','K562_AARS_IP_rep1',
+'K562_AARS_IP_rep2','K562_TRA2A_Inp_rep1','K562_TRA2A_IP_rep1','K562_TRA2A_IP_rep2','K562_LARP7_Inp_rep1','K562_LARP7_IP_rep1','K562_LARP7_IP_rep2',
+'K562_LARP4_Inp_rep1','K562_LARP4_IP_rep1','K562_LARP4_IP_rep2','K562_GRWD1_Inp_rep1','K562_GRWD1_IP_rep1','K562_GRWD1_IP_rep2','K562_NONO_Inp_rep1',
+'K562_NONO_IP_rep1','K562_NONO_IP_rep2','K562_AKAP8L_Inp_rep1','K562_AKAP8L_IP_rep1','K562_AKAP8L_IP_rep2','HepG2_PCBP1_Inp_rep1','HepG2_PCBP1_IP_rep1',
+'HepG2_PCBP1_IP_rep2','K562_SAFB_Inp_rep1','K562_SAFB_IP_rep1','K562_SAFB_IP_rep2','HepG2_PCBP2_Inp_rep1','HepG2_PCBP2_IP_rep1','HepG2_PCBP2_IP_rep2',
+'K562_TBRG4_Inp_rep1','K562_TBRG4_IP_rep1','K562_TBRG4_IP_rep2','HepG2_BCCIP_Inp_rep1','HepG2_BCCIP_IP_rep1','HepG2_BCCIP_IP_rep2','HepG2_TIA1_Inp_rep1',
+'HepG2_TIA1_IP_rep1','HepG2_TIA1_IP_rep2','K562_LIN28B_Inp_rep1','K562_LIN28B_IP_rep1','K562_LIN28B_IP_rep2','HepG2_XPO5_Inp_rep1','HepG2_XPO5_IP_rep1',
+'HepG2_XPO5_IP_rep2','HepG2_NIP7_Inp_rep1','HepG2_NIP7_IP_rep1','HepG2_NIP7_IP_rep2','K562_WRN_Inp_rep1','K562_WRN_IP_rep1','K562_WRN_IP_rep2',
+'K562_MTPAP_Inp_rep1','K562_MTPAP_IP_rep1','K562_MTPAP_IP_rep2','K562_ZNF800_Inp_rep1','K562_ZNF800_IP_rep1','K562_ZNF800_IP_rep2','K562_DGCR8_Inp_rep1',
+'K562_DGCR8_IP_rep1','K562_DGCR8_IP_rep2','K562_DDX51_Inp_rep1','K562_DDX51_IP_rep1','K562_DDX51_IP_rep2','K562_DDX52_Inp_rep1','K562_DDX52_IP_rep1',
+'K562_DDX52_IP_rep2','K562_DDX55_Inp_rep1','K562_DDX55_IP_rep1','K562_DDX55_IP_rep2','K562_ZC3H8_Inp_rep1','K562_ZC3H8_IP_rep1','K562_ZC3H8_IP_rep2',
+'HepG2_RPS3_Inp_rep1','HepG2_RPS3_IP_rep1','HepG2_RPS3_IP_rep2','K562_CSTF2T_Inp_rep1','K562_CSTF2T_IP_rep1','K562_CSTF2T_IP_rep2','HepG2_EIF3D_Inp_rep1',
+'HepG2_EIF3D_IP_rep1','HepG2_EIF3D_IP_rep2','K562_METAP2_Inp_rep1','K562_METAP2_IP_rep1','K562_METAP2_IP_rep2','K562_TAF15_Inp_rep1','K562_TAF15_IP_rep1',
+'K562_TAF15_IP_rep2','HepG2_LSM11_Inp_rep1','HepG2_LSM11_IP_rep1','HepG2_LSM11_IP_rep2','HepG2_CSTF2T_Inp_rep1','HepG2_CSTF2T_IP_rep1','HepG2_CSTF2T_IP_rep2',
+'K562_FMR1_Inp_rep1','K562_FMR1_IP_rep1','K562_FMR1_IP_rep2','K562_ZC3H11A_Inp_rep1','K562_ZC3H11A_IP_rep1','K562_ZC3H11A_IP_rep2','HepG2_XRN2_Inp_rep1',
+'HepG2_XRN2_IP_rep1','HepG2_XRN2_IP_rep2','HepG2_CDC40_Inp_rep1','HepG2_CDC40_IP_rep1','HepG2_CDC40_IP_rep2','K562_UTP3_Inp_rep1','K562_UTP3_IP_rep1',
+'K562_UTP3_IP_rep2','K562_AQR_Inp_rep1','K562_AQR_IP_rep1','K562_AQR_IP_rep2','K562_PABPC4_Inp_rep1','K562_PABPC4_IP_rep1','K562_PABPC4_IP_rep2',
+'K562_AKAP1_Inp_rep1','K562_AKAP1_IP_rep1','K562_AKAP1_IP_rep2','HepG2_SMNDC1_Inp_rep1','HepG2_SMNDC1_IP_rep1','HepG2_SMNDC1_IP_rep2','HepG2_SUGP2_Inp_rep1',
+'HepG2_SUGP2_IP_rep1','HepG2_SUGP2_IP_rep2','HepG2_UTP18_Inp_rep1','HepG2_UTP18_IP_rep1','HepG2_UTP18_IP_rep2','K562_PUS1_Inp_rep1','K562_PUS1_IP_rep1',
+'K562_PUS1_IP_rep2','HepG2_DDX3X_Inp_rep1','HepG2_DDX3X_IP_rep1','HepG2_DDX3X_IP_rep2','HepG2_RBFOX2_Inp_rep1','HepG2_RBFOX2_IP_rep1','HepG2_RBFOX2_IP_rep2',
+'K562_SDAD1_Inp_rep1','K562_SDAD1_IP_rep1','K562_SDAD1_IP_rep2','K562_PUM1_Inp_rep1','K562_PUM1_IP_rep1','K562_PUM1_IP_rep2','HepG2_SSB_Inp_rep1',
+'HepG2_SSB_IP_rep1','HepG2_SSB_IP_rep2','HepG2_PTBP1_Inp_rep1','HepG2_PTBP1_IP_rep1','HepG2_PTBP1_IP_rep2','K562_UPF1_Inp_rep1','K562_UPF1_IP_rep1',
+'K562_UPF1_IP_rep2','K562_ABCF1_Inp_rep1','K562_ABCF1_IP_rep1','K562_ABCF1_IP_rep2','HepG2_PPIG_Inp_rep1','HepG2_PPIG_IP_rep1','HepG2_PPIG_IP_rep2',
+'K562_PUM2_Inp_rep1','K562_PUM2_IP_rep1','K562_PUM2_IP_rep2','K562_EIF4G2_Inp_rep1','K562_EIF4G2_IP_rep1','K562_EIF4G2_IP_rep2','HepG2_QKI_Inp_rep1',
+'HepG2_QKI_IP_rep1','HepG2_QKI_IP_rep2','K562_SLTM_Inp_rep1','K562_SLTM_IP_rep1','K562_SLTM_IP_rep2','HepG2_LIN28B_Inp_rep1','HepG2_LIN28B_IP_rep1',
+'HepG2_LIN28B_IP_rep2','K562_NSUN2_Inp_rep1','K562_NSUN2_IP_rep1','K562_NSUN2_IP_rep2','HepG2_BUD13_Inp_rep1','HepG2_BUD13_IP_rep1','HepG2_BUD13_IP_rep2',
+'K562_ILF3_Inp_rep1','K562_ILF3_IP_rep1','K562_ILF3_IP_rep2','K562_EFTUD2_Inp_rep1','K562_EFTUD2_IP_rep1','K562_EFTUD2_IP_rep2','HepG2_HNRNPUL1_Inp_rep1',
+'HepG2_HNRNPUL1_IP_rep1','HepG2_HNRNPUL1_IP_rep2','K562_KHSRP_Inp_rep1','K562_KHSRP_IP_rep1','K562_KHSRP_IP_rep2','K562_IGF2BP2_Inp_rep1','K562_IGF2BP2_IP_rep1',
+'K562_IGF2BP2_IP_rep2','HepG2_DGCR8_Inp_rep1','HepG2_DGCR8_IP_rep1','HepG2_DGCR8_IP_rep2','HepG2_RBM5_Inp_rep1','HepG2_RBM5_IP_rep1','HepG2_RBM5_IP_rep2',
+'K562_FTO_Inp_rep1','K562_FTO_IP_rep1','K562_FTO_IP_rep2','K562_DHX30_Inp_rep1','K562_DHX30_IP_rep1','K562_DHX30_IP_rep2','K562_MATR3_Inp_rep1',
+'K562_MATR3_IP_rep1','K562_MATR3_IP_rep2','K562_SLBP_Inp_rep1','K562_SLBP_IP_rep1','K562_SLBP_IP_rep2','K562_BUD13_Inp_rep1','K562_BUD13_IP_rep1',
+'K562_BUD13_IP_rep2','K562_IGF2BP1_Inp_rep1','K562_IGF2BP1_IP_rep1','K562_IGF2BP1_IP_rep2']
+groups:
+  K562_RBFOX2:
+    input: ['K562_RBFOX2_Inp_rep1']
+    ip: ['K562_RBFOX2_IP_rep1','K562_RBFOX2_IP_rep2']
+  HepG2_RBFOX2:
+    input: ['HepG2_RBFOX2_Inp_rep1']
+    ip: ['HepG2_RBFOX2_IP_rep1','HepG2_RBFOX2_IP_rep2']
+  K562_PTBP1:
+    input: ['K562_PTBP1_Inp_rep1']
+    ip: ['K562_PTBP1_IP_rep1','K562_PTBP1_IP_rep2']
+  HepG2_PTBP1:
+    input: ['HepG2_PTBP1_Inp_rep1']
+    ip: ['HepG2_PTBP1_IP_rep1','HepG2_PTBP1_IP_rep2']
+  HepG2_SUPV3L1:
+    input: ['HepG2_SUPV3L1_Inp_rep1']
+    ip: ['HepG2_SUPV3L1_IP_rep1','HepG2_SUPV3L1_IP_rep2']
+  K562_SUPV3L1:
+    input: ['K562_SUPV3L1_Inp_rep1']
+    ip: ['K562_SUPV3L1_IP_rep1','K562_SUPV3L1_IP_rep2']
+  K562_FXR1:
+    input: ['K562_FXR1_Inp_rep1']
+    ip: ['K562_FXR1_IP_rep1','K562_FXR1_IP_rep2']
+  K562_FMR1:
+    input: ['K562_FMR1_Inp_rep1']
+    ip: ['K562_FMR1_IP_rep1','K562_FMR1_IP_rep2']
+  K562_DROSHA:
+    input: ['K562_DROSHA_Inp_rep1']
+    ip: ['K562_DROSHA_IP_rep1','K562_DROSHA_IP_rep2']
+  HepG2_DROSHA:
+    input: ['HepG2_DROSHA_Inp_rep1']
+    ip: ['HepG2_DROSHA_IP_rep1','HepG2_DROSHA_IP_rep2']
+  K562_DDX21:
+    input: ['K562_DDX21_Inp_rep1']
+    ip: ['K562_DDX21_IP_rep1','K562_DDX21_IP_rep2']
+  K562_DDX3X:
+    input: ['K562_DDX3X_Inp_rep1']
+    ip: ['K562_DDX3X_IP_rep1','K562_DDX3X_IP_rep2']
+  HepG2_DDX3X:
+    input: ['HepG2_DDX3X_Inp_rep1']
+    ip: ['HepG2_DDX3X_IP_rep1','HepG2_DDX3X_IP_rep2']
+  HepG2_DGCR8:
+    input: ['HepG2_DGCR8_Inp_rep1']
+    ip: ['HepG2_DGCR8_IP_rep1','HepG2_DGCR8_IP_rep2']
+  K562_DGCR8:
+    input: ['K562_DGCR8_Inp_rep1']
+    ip: ['K562_DGCR8_IP_rep1','K562_DGCR8_IP_rep2']
+  K562_ILF3:
+    input: ['K562_ILF3_Inp_rep1']
+    ip: ['K562_ILF3_IP_rep1','K562_ILF3_IP_rep2']
+  HepG2_ILF3:
+    input: ['HepG2_ILF3_Inp_rep1']
+    ip: ['HepG2_ILF3_IP_rep1','HepG2_ILF3_IP_rep2']
+  K562_HNRNPU:
+    input: ['K562_HNRNPU_Inp_rep1']
+    ip: ['K562_HNRNPU_IP_rep1','K562_HNRNPU_IP_rep2']
+  HepG2_HNRNPU:
+    input: ['HepG2_HNRNPU_Inp_rep1']
+    ip: ['HepG2_HNRNPU_IP_rep1','HepG2_HNRNPU_IP_rep2']
+  K562_DHX30:
+    input: ['K562_DHX30_Inp_rep1']
+    ip: ['K562_DHX30_IP_rep1','K562_DHX30_IP_rep2']
+  HepG2_DHX30:
+    input: ['HepG2_DHX30_Inp_rep1']
+    ip: ['HepG2_DHX30_IP_rep1','HepG2_DHX30_IP_rep2']
+  K562_AARS:
+    input: ['K562_AARS_Inp_rep1']
+    ip: ['K562_AARS_IP_rep1','K562_AARS_IP_rep2']
+  K562_AATF:
+    input: ['K562_AATF_Inp_rep1']
+    ip: ['K562_AATF_IP_rep1','K562_AATF_IP_rep2']
+  K562_ABCF1:
+    input: ['K562_ABCF1_Inp_rep1']
+    ip: ['K562_ABCF1_IP_rep1','K562_ABCF1_IP_rep2']
+  K562_AGGF1:
+    input: ['K562_AGGF1_Inp_rep1']
+    ip: ['K562_AGGF1_IP_rep1','K562_AGGF1_IP_rep2']
+  K562_AKAP1:
+    input: ['K562_AKAP1_Inp_rep1']
+    ip: ['K562_AKAP1_IP_rep1','K562_AKAP1_IP_rep2']
+  K562_AKAP8L:
+    input: ['K562_AKAP8L_Inp_rep1']
+    ip: ['K562_AKAP8L_IP_rep1','K562_AKAP8L_IP_rep2']
+  K562_APOBEC3C:
+    input: ['K562_APOBEC3C_Inp_rep1']
+    ip: ['K562_APOBEC3C_IP_rep1','K562_APOBEC3C_IP_rep2']
+  K562_AQR:
+    input: ['K562_AQR_Inp_rep1']
+    ip: ['K562_AQR_IP_rep1','K562_AQR_IP_rep2']
+  K562_BUD13:
+    input: ['K562_BUD13_Inp_rep1']
+    ip: ['K562_BUD13_IP_rep1','K562_BUD13_IP_rep2']
+  K562_CPEB4:
+    input: ['K562_CPEB4_Inp_rep1']
+    ip: ['K562_CPEB4_IP_rep1','K562_CPEB4_IP_rep2']
+  K562_CPSF6:
+    input: ['K562_CPSF6_Inp_rep1']
+    ip: ['K562_CPSF6_IP_rep1','K562_CPSF6_IP_rep2']
+  K562_CSTF2T:
+    input: ['K562_CSTF2T_Inp_rep1']
+    ip: ['K562_CSTF2T_IP_rep1','K562_CSTF2T_IP_rep2']
+  K562_DDX24:
+    input: ['K562_DDX24_Inp_rep1']
+    ip: ['K562_DDX24_IP_rep1','K562_DDX24_IP_rep2']
+  K562_DDX42:
+    input: ['K562_DDX42_Inp_rep1']
+    ip: ['K562_DDX42_IP_rep1','K562_DDX42_IP_rep2']
+  K562_DDX51:
+    input: ['K562_DDX51_Inp_rep1']
+    ip: ['K562_DDX51_IP_rep1','K562_DDX51_IP_rep2']
+  K562_DDX52:
+    input: ['K562_DDX52_Inp_rep1']
+    ip: ['K562_DDX52_IP_rep1','K562_DDX52_IP_rep2']
+  K562_DDX55:
+    input: ['K562_DDX55_Inp_rep1']
+    ip: ['K562_DDX55_IP_rep1','K562_DDX55_IP_rep2']
+  K562_DDX6:
+    input: ['K562_DDX6_Inp_rep1']
+    ip: ['K562_DDX6_IP_rep1','K562_DDX6_IP_rep2']
+  K562_EFTUD2:
+    input: ['K562_EFTUD2_Inp_rep1']
+    ip: ['K562_EFTUD2_IP_rep1','K562_EFTUD2_IP_rep2']
+  K562_EIF3G:
+    input: ['K562_EIF3G_Inp_rep1']
+    ip: ['K562_EIF3G_IP_rep1','K562_EIF3G_IP_rep2']
+  K562_EIF4G2:
+    input: ['K562_EIF4G2_Inp_rep1']
+    ip: ['K562_EIF4G2_IP_rep1','K562_EIF4G2_IP_rep2']
+  K562_EWSR1:
+    input: ['K562_EWSR1_Inp_rep1']
+    ip: ['K562_EWSR1_IP_rep1','K562_EWSR1_IP_rep2']
+  K562_EXOSC5:
+    input: ['K562_EXOSC5_Inp_rep1']
+    ip: ['K562_EXOSC5_IP_rep1','K562_EXOSC5_IP_rep2']
+  K562_FAM120A:
+    input: ['K562_FAM120A_Inp_rep1']
+    ip: ['K562_FAM120A_IP_rep1','K562_FAM120A_IP_rep2']
+  K562_FASTKD2:
+    input: ['K562_FASTKD2_Inp_rep1']
+    ip: ['K562_FASTKD2_IP_rep1','K562_FASTKD2_IP_rep2']
+  K562_FTO:
+    input: ['K562_FTO_Inp_rep1']
+    ip: ['K562_FTO_IP_rep1','K562_FTO_IP_rep2']
+  K562_FUS:
+    input: ['K562_FUS_Inp_rep1']
+    ip: ['K562_FUS_IP_rep1','K562_FUS_IP_rep2']
+  K562_FXR2:
+    input: ['K562_FXR2_Inp_rep1']
+    ip: ['K562_FXR2_IP_rep1','K562_FXR2_IP_rep2']
+  K562_GEMIN5:
+    input: ['K562_GEMIN5_Inp_rep1']
+    ip: ['K562_GEMIN5_IP_rep1','K562_GEMIN5_IP_rep2']
+  K562_GNL3:
+    input: ['K562_GNL3_Inp_rep1']
+    ip: ['K562_GNL3_IP_rep1','K562_GNL3_IP_rep2']
+  K562_GPKOW:
+    input: ['K562_GPKOW_Inp_rep1']
+    ip: ['K562_GPKOW_IP_rep1','K562_GPKOW_IP_rep2']
+  K562_GRWD1:
+    input: ['K562_GRWD1_Inp_rep1']
+    ip: ['K562_GRWD1_IP_rep1','K562_GRWD1_IP_rep2']
+  K562_GTF2F1:
+    input: ['K562_GTF2F1_Inp_rep1']
+    ip: ['K562_GTF2F1_IP_rep1','K562_GTF2F1_IP_rep2']
+  K562_HLTF:
+    input: ['K562_HLTF_Inp_rep1']
+    ip: ['K562_HLTF_IP_rep1','K562_HLTF_IP_rep2']
+  K562_HNRNPA1:
+    input: ['K562_HNRNPA1_Inp_rep1']
+    ip: ['K562_HNRNPA1_IP_rep1','K562_HNRNPA1_IP_rep2']
+  K562_HNRNPC:
+    input: ['K562_HNRNPC_Inp_rep1']
+    ip: ['K562_HNRNPC_IP_rep1','K562_HNRNPC_IP_rep2']
+  K562_HNRNPK:
+    input: ['K562_HNRNPK_Inp_rep1']
+    ip: ['K562_HNRNPK_IP_rep1','K562_HNRNPK_IP_rep2']
+  K562_HNRNPL:
+    input: ['K562_HNRNPL_Inp_rep1']
+    ip: ['K562_HNRNPL_IP_rep1','K562_HNRNPL_IP_rep2']
+  K562_HNRNPM:
+    input: ['K562_HNRNPM_Inp_rep1']
+    ip: ['K562_HNRNPM_IP_rep1','K562_HNRNPM_IP_rep2']
+  K562_HNRNPUL1:
+    input: ['K562_HNRNPUL1_Inp_rep1']
+    ip: ['K562_HNRNPUL1_IP_rep1','K562_HNRNPUL1_IP_rep2']
+  K562_IGF2BP1:
+    input: ['K562_IGF2BP1_Inp_rep1']
+    ip: ['K562_IGF2BP1_IP_rep1','K562_IGF2BP1_IP_rep2']
+  K562_IGF2BP2:
+    input: ['K562_IGF2BP2_Inp_rep1']
+    ip: ['K562_IGF2BP2_IP_rep1','K562_IGF2BP2_IP_rep2']
+  K562_KHDRBS1:
+    input: ['K562_KHDRBS1_Inp_rep1']
+    ip: ['K562_KHDRBS1_IP_rep1','K562_KHDRBS1_IP_rep2']
+  K562_KHSRP:
+    input: ['K562_KHSRP_Inp_rep1']
+    ip: ['K562_KHSRP_IP_rep1','K562_KHSRP_IP_rep2']
+  K562_LARP4:
+    input: ['K562_LARP4_Inp_rep1']
+    ip: ['K562_LARP4_IP_rep1','K562_LARP4_IP_rep2']
+  K562_LARP7:
+    input: ['K562_LARP7_Inp_rep1']
+    ip: ['K562_LARP7_IP_rep1','K562_LARP7_IP_rep2']
+  K562_LIN28B:
+    input: ['K562_LIN28B_Inp_rep1']
+    ip: ['K562_LIN28B_IP_rep1','K562_LIN28B_IP_rep2']
+  K562_LSM11:
+    input: ['K562_LSM11_Inp_rep1']
+    ip: ['K562_LSM11_IP_rep1','K562_LSM11_IP_rep2']
+  K562_MATR3:
+    input: ['K562_MATR3_Inp_rep1']
+    ip: ['K562_MATR3_IP_rep1','K562_MATR3_IP_rep2']
+  K562_METAP2:
+    input: ['K562_METAP2_Inp_rep1']
+    ip: ['K562_METAP2_IP_rep1','K562_METAP2_IP_rep2']
+  K562_MTPAP:
+    input: ['K562_MTPAP_Inp_rep1']
+    ip: ['K562_MTPAP_IP_rep1','K562_MTPAP_IP_rep2']
+  K562_NCBP2:
+    input: ['K562_NCBP2_Inp_rep1']
+    ip: ['K562_NCBP2_IP_rep1','K562_NCBP2_IP_rep2']
+  K562_NIPBL:
+    input: ['K562_NIPBL_Inp_rep1']
+    ip: ['K562_NIPBL_IP_rep1','K562_NIPBL_IP_rep2']
+  K562_NOLC1:
+    input: ['K562_NOLC1_Inp_rep1']
+    ip: ['K562_NOLC1_IP_rep1','K562_NOLC1_IP_rep2']
+  K562_NONO:
+    input: ['K562_NONO_Inp_rep1']
+    ip: ['K562_NONO_IP_rep1','K562_NONO_IP_rep2']
+  K562_NPM1:
+    input: ['K562_NPM1_Inp_rep1']
+    ip: ['K562_NPM1_IP_rep1','K562_NPM1_IP_rep2']
+  K562_NSUN2:
+    input: ['K562_NSUN2_Inp_rep1']
+    ip: ['K562_NSUN2_IP_rep1','K562_NSUN2_IP_rep2']
+  K562_PABPC4:
+    input: ['K562_PABPC4_Inp_rep1']
+    ip: ['K562_PABPC4_IP_rep1','K562_PABPC4_IP_rep2']
+  K562_PCBP1:
+    input: ['K562_PCBP1_Inp_rep1']
+    ip: ['K562_PCBP1_IP_rep1','K562_PCBP1_IP_rep2']
+  K562_PHF6:
+    input: ['K562_PHF6_Inp_rep1']
+    ip: ['K562_PHF6_IP_rep1','K562_PHF6_IP_rep2']
+  K562_PPIL4:
+    input: ['K562_PPIL4_Inp_rep1']
+    ip: ['K562_PPIL4_IP_rep1','K562_PPIL4_IP_rep2']
+  K562_PRPF8:
+    input: ['K562_PRPF8_Inp_rep1']
+    ip: ['K562_PRPF8_IP_rep1','K562_PRPF8_IP_rep2']
+  K562_PUM1:
+    input: ['K562_PUM1_Inp_rep1']
+    ip: ['K562_PUM1_IP_rep1','K562_PUM1_IP_rep2']
+  K562_PUM2:
+    input: ['K562_PUM2_Inp_rep1']
+    ip: ['K562_PUM2_IP_rep1','K562_PUM2_IP_rep2']
+  K562_PUS1:
+    input: ['K562_PUS1_Inp_rep1']
+    ip: ['K562_PUS1_IP_rep1','K562_PUS1_IP_rep2']
+  K562_QKI:
+    input: ['K562_QKI_Inp_rep1']
+    ip: ['K562_QKI_IP_rep1','K562_QKI_IP_rep2']
+  K562_RBM15:
+    input: ['K562_RBM15_Inp_rep1']
+    ip: ['K562_RBM15_IP_rep1','K562_RBM15_IP_rep2']
+  K562_RBM22:
+    input: ['K562_RBM22_Inp_rep1']
+    ip: ['K562_RBM22_IP_rep1','K562_RBM22_IP_rep2']
+  K562_RPS11:
+    input: ['K562_RPS11_Inp_rep1']
+    ip: ['K562_RPS11_IP_rep1','K562_RPS11_IP_rep2']
+  K562_RPS3:
+    input: ['K562_RPS3_Inp_rep1']
+    ip: ['K562_RPS3_IP_rep1','K562_RPS3_IP_rep2']
+  K562_SAFB:
+    input: ['K562_SAFB_Inp_rep1']
+    ip: ['K562_SAFB_IP_rep1','K562_SAFB_IP_rep2']
+  K562_SAFB2:
+    input: ['K562_SAFB2_Inp_rep1']
+    ip: ['K562_SAFB2_IP_rep1','K562_SAFB2_IP_rep2']
+  K562_SBDS:
+    input: ['K562_SBDS_Inp_rep1']
+    ip: ['K562_SBDS_IP_rep1','K562_SBDS_IP_rep2']
+  K562_SDAD1:
+    input: ['K562_SDAD1_Inp_rep1']
+    ip: ['K562_SDAD1_IP_rep1','K562_SDAD1_IP_rep2']
+  K562_SERBP1:
+    input: ['K562_SERBP1_Inp_rep1']
+    ip: ['K562_SERBP1_IP_rep1','K562_SERBP1_IP_rep2']
+  K562_SF3B1:
+    input: ['K562_SF3B1_Inp_rep1']
+    ip: ['K562_SF3B1_IP_rep1','K562_SF3B1_IP_rep2']
+  K562_SF3B4:
+    input: ['K562_SF3B4_Inp_rep1']
+    ip: ['K562_SF3B4_IP_rep1','K562_SF3B4_IP_rep2']
+  K562_SLBP:
+    input: ['K562_SLBP_Inp_rep1']
+    ip: ['K562_SLBP_IP_rep1','K562_SLBP_IP_rep2']
+  K562_SLTM:
+    input: ['K562_SLTM_Inp_rep1']
+    ip: ['K562_SLTM_IP_rep1','K562_SLTM_IP_rep2']
+  K562_SMNDC1:
+    input: ['K562_SMNDC1_Inp_rep1']
+    ip: ['K562_SMNDC1_IP_rep1','K562_SMNDC1_IP_rep2']
+  K562_SND1:
+    input: ['K562_SND1_Inp_rep1']
+    ip: ['K562_SND1_IP_rep1','K562_SND1_IP_rep2']
+  K562_SRSF1:
+    input: ['K562_SRSF1_Inp_rep1']
+    ip: ['K562_SRSF1_IP_rep1','K562_SRSF1_IP_rep2']
+  K562_SRSF7:
+    input: ['K562_SRSF7_Inp_rep1']
+    ip: ['K562_SRSF7_IP_rep1','K562_SRSF7_IP_rep2']
+  K562_SSB:
+    input: ['K562_SSB_Inp_rep1']
+    ip: ['K562_SSB_IP_rep1','K562_SSB_IP_rep2']
+  K562_TAF15:
+    input: ['K562_TAF15_Inp_rep1']
+    ip: ['K562_TAF15_IP_rep1','K562_TAF15_IP_rep2']
+  K562_TARDBP:
+    input: ['K562_TARDBP_Inp_rep1']
+    ip: ['K562_TARDBP_IP_rep1','K562_TARDBP_IP_rep2']
+  K562_TBRG4:
+    input: ['K562_TBRG4_Inp_rep1']
+    ip: ['K562_TBRG4_IP_rep1','K562_TBRG4_IP_rep2']
+  K562_TIA1:
+    input: ['K562_TIA1_Inp_rep1']
+    ip: ['K562_TIA1_IP_rep1','K562_TIA1_IP_rep2']
+  K562_TRA2A:
+    input: ['K562_TRA2A_Inp_rep1']
+    ip: ['K562_TRA2A_IP_rep1','K562_TRA2A_IP_rep2']
+  K562_TROVE2:
+    input: ['K562_TROVE2_Inp_rep1']
+    ip: ['K562_TROVE2_IP_rep1','K562_TROVE2_IP_rep2']
+  K562_U2AF1:
+    input: ['K562_U2AF1_Inp_rep1']
+    ip: ['K562_U2AF1_IP_rep1','K562_U2AF1_IP_rep2']
+  K562_U2AF2:
+    input: ['K562_U2AF2_Inp_rep1']
+    ip: ['K562_U2AF2_IP_rep1','K562_U2AF2_IP_rep2']
+  K562_UCHL5:
+    input: ['K562_UCHL5_Inp_rep1']
+    ip: ['K562_UCHL5_IP_rep1','K562_UCHL5_IP_rep2']
+  K562_UPF1:
+    input: ['K562_UPF1_Inp_rep1']
+    ip: ['K562_UPF1_IP_rep1','K562_UPF1_IP_rep2']
+  K562_UTP18:
+    input: ['K562_UTP18_Inp_rep1']
+    ip: ['K562_UTP18_IP_rep1','K562_UTP18_IP_rep2']
+  K562_UTP3:
+    input: ['K562_UTP3_Inp_rep1']
+    ip: ['K562_UTP3_IP_rep1','K562_UTP3_IP_rep2']
+  K562_WDR3:
+    input: ['K562_WDR3_Inp_rep1']
+    ip: ['K562_WDR3_IP_rep1','K562_WDR3_IP_rep2']
+  K562_WDR43:
+    input: ['K562_WDR43_Inp_rep1']
+    ip: ['K562_WDR43_IP_rep1','K562_WDR43_IP_rep2']
+  K562_WRN:
+    input: ['K562_WRN_Inp_rep1']
+    ip: ['K562_WRN_IP_rep1','K562_WRN_IP_rep2']
+  K562_XRCC6:
+    input: ['K562_XRCC6_Inp_rep1']
+    ip: ['K562_XRCC6_IP_rep1','K562_XRCC6_IP_rep2']
+  K562_XRN2:
+    input: ['K562_XRN2_Inp_rep1']
+    ip: ['K562_XRN2_IP_rep1','K562_XRN2_IP_rep2']
+  K562_YBX3:
+    input: ['K562_YBX3_Inp_rep1']
+    ip: ['K562_YBX3_IP_rep1','K562_YBX3_IP_rep2']
+  K562_YWHAG:
+    input: ['K562_YWHAG_Inp_rep1']
+    ip: ['K562_YWHAG_IP_rep1','K562_YWHAG_IP_rep2']
+  K562_ZC3H11A:
+    input: ['K562_ZC3H11A_Inp_rep1']
+    ip: ['K562_ZC3H11A_IP_rep1','K562_ZC3H11A_IP_rep2']
+  K562_ZC3H8:
+    input: ['K562_ZC3H8_Inp_rep1']
+    ip: ['K562_ZC3H8_IP_rep1','K562_ZC3H8_IP_rep2']
+  K562_ZNF622:
+    input: ['K562_ZNF622_Inp_rep1']
+    ip: ['K562_ZNF622_IP_rep1','K562_ZNF622_IP_rep2']
+  K562_ZNF800:
+    input: ['K562_ZNF800_Inp_rep1']
+    ip: ['K562_ZNF800_IP_rep1','K562_ZNF800_IP_rep2']
+  K562_ZRANB2:
+    input: ['K562_ZRANB2_Inp_rep1']
+    ip: ['K562_ZRANB2_IP_rep1','K562_ZRANB2_IP_rep2']
+  HepG2_AGGF1:
+    input: ['HepG2_AGGF1_Inp_rep1']
+    ip: ['HepG2_AGGF1_IP_rep1','HepG2_AGGF1_IP_rep2']
+  HepG2_AKAP1:
+    input: ['HepG2_AKAP1_Inp_rep1']
+    ip: ['HepG2_AKAP1_IP_rep1','HepG2_AKAP1_IP_rep2']
+  HepG2_AQR:
+    input: ['HepG2_AQR_Inp_rep1']
+    ip: ['HepG2_AQR_IP_rep1','HepG2_AQR_IP_rep2']
+  HepG2_BCCIP:
+    input: ['HepG2_BCCIP_Inp_rep1']
+    ip: ['HepG2_BCCIP_IP_rep1','HepG2_BCCIP_IP_rep2']
+  HepG2_BCLAF1:
+    input: ['HepG2_BCLAF1_Inp_rep1']
+    ip: ['HepG2_BCLAF1_IP_rep1','HepG2_BCLAF1_IP_rep2']
+  HepG2_BUD13:
+    input: ['HepG2_BUD13_Inp_rep1']
+    ip: ['HepG2_BUD13_IP_rep1','HepG2_BUD13_IP_rep2']
+  HepG2_CDC40:
+    input: ['HepG2_CDC40_Inp_rep1']
+    ip: ['HepG2_CDC40_IP_rep1','HepG2_CDC40_IP_rep2']
+  HepG2_CSTF2:
+    input: ['HepG2_CSTF2_Inp_rep1']
+    ip: ['HepG2_CSTF2_IP_rep1','HepG2_CSTF2_IP_rep2']
+  HepG2_CSTF2T:
+    input: ['HepG2_CSTF2T_Inp_rep1']
+    ip: ['HepG2_CSTF2T_IP_rep1','HepG2_CSTF2T_IP_rep2']
+  HepG2_DDX52:
+    input: ['HepG2_DDX52_Inp_rep1']
+    ip: ['HepG2_DDX52_IP_rep1','HepG2_DDX52_IP_rep2']
+  HepG2_DDX55:
+    input: ['HepG2_DDX55_Inp_rep1']
+    ip: ['HepG2_DDX55_IP_rep1','HepG2_DDX55_IP_rep2']
+  HepG2_DDX59:
+    input: ['HepG2_DDX59_Inp_rep1']
+    ip: ['HepG2_DDX59_IP_rep1','HepG2_DDX59_IP_rep2']
+  HepG2_DDX6:
+    input: ['HepG2_DDX6_Inp_rep1']
+    ip: ['HepG2_DDX6_IP_rep1','HepG2_DDX6_IP_rep2']
+  HepG2_DKC1:
+    input: ['HepG2_DKC1_Inp_rep1']
+    ip: ['HepG2_DKC1_IP_rep1','HepG2_DKC1_IP_rep2']
+  HepG2_EFTUD2:
+    input: ['HepG2_EFTUD2_Inp_rep1']
+    ip: ['HepG2_EFTUD2_IP_rep1','HepG2_EFTUD2_IP_rep2']
+  HepG2_EIF3D:
+    input: ['HepG2_EIF3D_Inp_rep1']
+    ip: ['HepG2_EIF3D_IP_rep1','HepG2_EIF3D_IP_rep2']
+  HepG2_EIF3H:
+    input: ['HepG2_EIF3H_Inp_rep1']
+    ip: ['HepG2_EIF3H_IP_rep1','HepG2_EIF3H_IP_rep2']
+  HepG2_EXOSC5:
+    input: ['HepG2_EXOSC5_Inp_rep1']
+    ip: ['HepG2_EXOSC5_IP_rep1','HepG2_EXOSC5_IP_rep2']
+  HepG2_FAM120A:
+    input: ['HepG2_FAM120A_Inp_rep1']
+    ip: ['HepG2_FAM120A_IP_rep1','HepG2_FAM120A_IP_rep2']
+  HepG2_FASTKD2:
+    input: ['HepG2_FASTKD2_Inp_rep1']
+    ip: ['HepG2_FASTKD2_IP_rep1','HepG2_FASTKD2_IP_rep2']
+  HepG2_FKBP4:
+    input: ['HepG2_FKBP4_Inp_rep1']
+    ip: ['HepG2_FKBP4_IP_rep1','HepG2_FKBP4_IP_rep2']
+  HepG2_FTO:
+    input: ['HepG2_FTO_Inp_rep1']
+    ip: ['HepG2_FTO_IP_rep1','HepG2_FTO_IP_rep2']
+  HepG2_FUBP3:
+    input: ['HepG2_FUBP3_Inp_rep1']
+    ip: ['HepG2_FUBP3_IP_rep1','HepG2_FUBP3_IP_rep2']
+  HepG2_FUS:
+    input: ['HepG2_FUS_Inp_rep1']
+    ip: ['HepG2_FUS_IP_rep1','HepG2_FUS_IP_rep2']
+  HepG2_FXR2:
+    input: ['HepG2_FXR2_Inp_rep1']
+    ip: ['HepG2_FXR2_IP_rep1','HepG2_FXR2_IP_rep2']
+  HepG2_G3BP1:
+    input: ['HepG2_G3BP1_Inp_rep1']
+    ip: ['HepG2_G3BP1_IP_rep1','HepG2_G3BP1_IP_rep2']
+  HepG2_GRSF1:
+    input: ['HepG2_GRSF1_Inp_rep1']
+    ip: ['HepG2_GRSF1_IP_rep1','HepG2_GRSF1_IP_rep2']
+  HepG2_GRWD1:
+    input: ['HepG2_GRWD1_Inp_rep1']
+    ip: ['HepG2_GRWD1_IP_rep1','HepG2_GRWD1_IP_rep2']
+  HepG2_GTF2F1:
+    input: ['HepG2_GTF2F1_Inp_rep1']
+    ip: ['HepG2_GTF2F1_IP_rep1','HepG2_GTF2F1_IP_rep2']
+  HepG2_HLTF:
+    input: ['HepG2_HLTF_Inp_rep1']
+    ip: ['HepG2_HLTF_IP_rep1','HepG2_HLTF_IP_rep2']
+  HepG2_HNRNPA1:
+    input: ['HepG2_HNRNPA1_Inp_rep1']
+    ip: ['HepG2_HNRNPA1_IP_rep1','HepG2_HNRNPA1_IP_rep2']
+  HepG2_HNRNPC:
+    input: ['HepG2_HNRNPC_Inp_rep1']
+    ip: ['HepG2_HNRNPC_IP_rep1','HepG2_HNRNPC_IP_rep2']
+  HepG2_HNRNPK:
+    input: ['HepG2_HNRNPK_Inp_rep1']
+    ip: ['HepG2_HNRNPK_IP_rep1','HepG2_HNRNPK_IP_rep2']
+  HepG2_HNRNPL:
+    input: ['HepG2_HNRNPL_Inp_rep1']
+    ip: ['HepG2_HNRNPL_IP_rep1','HepG2_HNRNPL_IP_rep2']
+  HepG2_HNRNPM:
+    input: ['HepG2_HNRNPM_Inp_rep1']
+    ip: ['HepG2_HNRNPM_IP_rep1','HepG2_HNRNPM_IP_rep2']
+  HepG2_HNRNPUL1:
+    input: ['HepG2_HNRNPUL1_Inp_rep1']
+    ip: ['HepG2_HNRNPUL1_IP_rep1','HepG2_HNRNPUL1_IP_rep2']
+  HepG2_IGF2BP1:
+    input: ['HepG2_IGF2BP1_Inp_rep1']
+    ip: ['HepG2_IGF2BP1_IP_rep1','HepG2_IGF2BP1_IP_rep2']
+  HepG2_IGF2BP3:
+    input: ['HepG2_IGF2BP3_Inp_rep1']
+    ip: ['HepG2_IGF2BP3_IP_rep1','HepG2_IGF2BP3_IP_rep2']
+  HepG2_KHSRP:
+    input: ['HepG2_KHSRP_Inp_rep1']
+    ip: ['HepG2_KHSRP_IP_rep1','HepG2_KHSRP_IP_rep2']
+  HepG2_LARP4:
+    input: ['HepG2_LARP4_Inp_rep1']
+    ip: ['HepG2_LARP4_IP_rep1','HepG2_LARP4_IP_rep2']
+  HepG2_LARP7:
+    input: ['HepG2_LARP7_Inp_rep1']
+    ip: ['HepG2_LARP7_IP_rep1','HepG2_LARP7_IP_rep2']
+  HepG2_LIN28B:
+    input: ['HepG2_LIN28B_Inp_rep1']
+    ip: ['HepG2_LIN28B_IP_rep1','HepG2_LIN28B_IP_rep2']
+  HepG2_LSM11:
+    input: ['HepG2_LSM11_Inp_rep1']
+    ip: ['HepG2_LSM11_IP_rep1','HepG2_LSM11_IP_rep2']
+  HepG2_MATR3:
+    input: ['HepG2_MATR3_Inp_rep1']
+    ip: ['HepG2_MATR3_IP_rep1','HepG2_MATR3_IP_rep2']
+  HepG2_NCBP2:
+    input: ['HepG2_NCBP2_Inp_rep1']
+    ip: ['HepG2_NCBP2_IP_rep1','HepG2_NCBP2_IP_rep2']
+  HepG2_NIP7:
+    input: ['HepG2_NIP7_Inp_rep1']
+    ip: ['HepG2_NIP7_IP_rep1','HepG2_NIP7_IP_rep2']
+  HepG2_NKRF:
+    input: ['HepG2_NKRF_Inp_rep1']
+    ip: ['HepG2_NKRF_IP_rep1','HepG2_NKRF_IP_rep2']
+  HepG2_NOL12:
+    input: ['HepG2_NOL12_Inp_rep1']
+    ip: ['HepG2_NOL12_IP_rep1','HepG2_NOL12_IP_rep2']
+  HepG2_NOLC1:
+    input: ['HepG2_NOLC1_Inp_rep1']
+    ip: ['HepG2_NOLC1_IP_rep1','HepG2_NOLC1_IP_rep2']
+  HepG2_PABPN1:
+    input: ['HepG2_PABPN1_Inp_rep1']
+    ip: ['HepG2_PABPN1_IP_rep1','HepG2_PABPN1_IP_rep2']
+  HepG2_PCBP1:
+    input: ['HepG2_PCBP1_Inp_rep1']
+    ip: ['HepG2_PCBP1_IP_rep1','HepG2_PCBP1_IP_rep2']
+  HepG2_PCBP2:
+    input: ['HepG2_PCBP2_Inp_rep1']
+    ip: ['HepG2_PCBP2_IP_rep1','HepG2_PCBP2_IP_rep2']
+  HepG2_POLR2G:
+    input: ['HepG2_POLR2G_Inp_rep1']
+    ip: ['HepG2_POLR2G_IP_rep1','HepG2_POLR2G_IP_rep2']
+  HepG2_PPIG:
+    input: ['HepG2_PPIG_Inp_rep1']
+    ip: ['HepG2_PPIG_IP_rep1','HepG2_PPIG_IP_rep2']
+  HepG2_PRPF4:
+    input: ['HepG2_PRPF4_Inp_rep1']
+    ip: ['HepG2_PRPF4_IP_rep1','HepG2_PRPF4_IP_rep2']
+  HepG2_PRPF8:
+    input: ['HepG2_PRPF8_Inp_rep1']
+    ip: ['HepG2_PRPF8_IP_rep1','HepG2_PRPF8_IP_rep2']
+  HepG2_QKI:
+    input: ['HepG2_QKI_Inp_rep1']
+    ip: ['HepG2_QKI_IP_rep1','HepG2_QKI_IP_rep2']
+  HepG2_RBM15:
+    input: ['HepG2_RBM15_Inp_rep1']
+    ip: ['HepG2_RBM15_IP_rep1','HepG2_RBM15_IP_rep2']
+  HepG2_RBM22:
+    input: ['HepG2_RBM22_Inp_rep1']
+    ip: ['HepG2_RBM22_IP_rep1','HepG2_RBM22_IP_rep2']
+  HepG2_RBM5:
+    input: ['HepG2_RBM5_Inp_rep1']
+    ip: ['HepG2_RBM5_IP_rep1','HepG2_RBM5_IP_rep2']
+  HepG2_RPS3:
+    input: ['HepG2_RPS3_Inp_rep1']
+    ip: ['HepG2_RPS3_IP_rep1','HepG2_RPS3_IP_rep2']
+  HepG2_SAFB:
+    input: ['HepG2_SAFB_Inp_rep1']
+    ip: ['HepG2_SAFB_IP_rep1','HepG2_SAFB_IP_rep2']
+  HepG2_SDAD1:
+    input: ['HepG2_SDAD1_Inp_rep1']
+    ip: ['HepG2_SDAD1_IP_rep1','HepG2_SDAD1_IP_rep2']
+  HepG2_SF3A3:
+    input: ['HepG2_SF3A3_Inp_rep1']
+    ip: ['HepG2_SF3A3_IP_rep1','HepG2_SF3A3_IP_rep2']
+  HepG2_SF3B4:
+    input: ['HepG2_SF3B4_Inp_rep1']
+    ip: ['HepG2_SF3B4_IP_rep1','HepG2_SF3B4_IP_rep2']
+  HepG2_SFPQ:
+    input: ['HepG2_SFPQ_Inp_rep1']
+    ip: ['HepG2_SFPQ_IP_rep1','HepG2_SFPQ_IP_rep2']
+  HepG2_SLTM:
+    input: ['HepG2_SLTM_Inp_rep1']
+    ip: ['HepG2_SLTM_IP_rep1','HepG2_SLTM_IP_rep2']
+  HepG2_SMNDC1:
+    input: ['HepG2_SMNDC1_Inp_rep1']
+    ip: ['HepG2_SMNDC1_IP_rep1','HepG2_SMNDC1_IP_rep2']
+  HepG2_SND1:
+    input: ['HepG2_SND1_Inp_rep1']
+    ip: ['HepG2_SND1_IP_rep1','HepG2_SND1_IP_rep2']
+  HepG2_SRSF1:
+    input: ['HepG2_SRSF1_Inp_rep1']
+    ip: ['HepG2_SRSF1_IP_rep1','HepG2_SRSF1_IP_rep2']
+  HepG2_SRSF7:
+    input: ['HepG2_SRSF7_Inp_rep1']
+    ip: ['HepG2_SRSF7_IP_rep1','HepG2_SRSF7_IP_rep2']
+  HepG2_SRSF9:
+    input: ['HepG2_SRSF9_Inp_rep1']
+    ip: ['HepG2_SRSF9_IP_rep1','HepG2_SRSF9_IP_rep2']
+  HepG2_SSB:
+    input: ['HepG2_SSB_Inp_rep1']
+    ip: ['HepG2_SSB_IP_rep1','HepG2_SSB_IP_rep2']
+  HepG2_STAU2:
+    input: ['HepG2_STAU2_Inp_rep1']
+    ip: ['HepG2_STAU2_IP_rep1','HepG2_STAU2_IP_rep2']
+  HepG2_SUB1:
+    input: ['HepG2_SUB1_Inp_rep1']
+    ip: ['HepG2_SUB1_IP_rep1','HepG2_SUB1_IP_rep2']
+  HepG2_SUGP2:
+    input: ['HepG2_SUGP2_Inp_rep1']
+    ip: ['HepG2_SUGP2_IP_rep1','HepG2_SUGP2_IP_rep2']
+  HepG2_TAF15:
+    input: ['HepG2_TAF15_Inp_rep1']
+    ip: ['HepG2_TAF15_IP_rep1','HepG2_TAF15_IP_rep2']
+  HepG2_TBRG4:
+    input: ['HepG2_TBRG4_Inp_rep1']
+    ip: ['HepG2_TBRG4_IP_rep1','HepG2_TBRG4_IP_rep2']
+  HepG2_TIA1:
+    input: ['HepG2_TIA1_Inp_rep1']
+    ip: ['HepG2_TIA1_IP_rep1','HepG2_TIA1_IP_rep2']
+  HepG2_TIAL1:
+    input: ['HepG2_TIAL1_Inp_rep1']
+    ip: ['HepG2_TIAL1_IP_rep1','HepG2_TIAL1_IP_rep2']
+  HepG2_TRA2A:
+    input: ['HepG2_TRA2A_Inp_rep1']
+    ip: ['HepG2_TRA2A_IP_rep1','HepG2_TRA2A_IP_rep2']
+  HepG2_TROVE2:
+    input: ['HepG2_TROVE2_Inp_rep1']
+    ip: ['HepG2_TROVE2_IP_rep1','HepG2_TROVE2_IP_rep2']
+  HepG2_U2AF1:
+    input: ['HepG2_U2AF1_Inp_rep1']
+    ip: ['HepG2_U2AF1_IP_rep1','HepG2_U2AF1_IP_rep2']
+  HepG2_U2AF2:
+    input: ['HepG2_U2AF2_Inp_rep1']
+    ip: ['HepG2_U2AF2_IP_rep1','HepG2_U2AF2_IP_rep2']
+  HepG2_UCHL5:
+    input: ['HepG2_UCHL5_Inp_rep1']
+    ip: ['HepG2_UCHL5_IP_rep1','HepG2_UCHL5_IP_rep2']
+  HepG2_UPF1:
+    input: ['HepG2_UPF1_Inp_rep1']
+    ip: ['HepG2_UPF1_IP_rep1','HepG2_UPF1_IP_rep2']
+  HepG2_UTP18:
+    input: ['HepG2_UTP18_Inp_rep1']
+    ip: ['HepG2_UTP18_IP_rep1','HepG2_UTP18_IP_rep2']
+  HepG2_WDR43:
+    input: ['HepG2_WDR43_Inp_rep1']
+    ip: ['HepG2_WDR43_IP_rep1','HepG2_WDR43_IP_rep2']
+  HepG2_XPO5:
+    input: ['HepG2_XPO5_Inp_rep1']
+    ip: ['HepG2_XPO5_IP_rep1','HepG2_XPO5_IP_rep2']
+  HepG2_XRCC6:
+    input: ['HepG2_XRCC6_Inp_rep1']
+    ip: ['HepG2_XRCC6_IP_rep1','HepG2_XRCC6_IP_rep2']
+  HepG2_XRN2:
+    input: ['HepG2_XRN2_Inp_rep1']
+    ip: ['HepG2_XRN2_IP_rep1','HepG2_XRN2_IP_rep2']
+  HepG2_YBX3:
+    input: ['HepG2_YBX3_Inp_rep1']
+    ip: ['HepG2_YBX3_IP_rep1','HepG2_YBX3_IP_rep2']
+  HepG2_ZC3H11A:
+    input: ['HepG2_ZC3H11A_Inp_rep1']
+    ip: ['HepG2_ZC3H11A_IP_rep1','HepG2_ZC3H11A_IP_rep2']
+  HepG2_ZNF800:
+    input: ['HepG2_ZNF800_Inp_rep1']
+    ip: ['HepG2_ZNF800_IP_rep1','HepG2_ZNF800_IP_rep2']

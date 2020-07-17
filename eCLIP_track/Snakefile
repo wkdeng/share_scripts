@@ -1,0 +1,1069 @@
+# @author [Wankun Deng]
+# @email [dengwankun@hotmail.com]
+# @create date 2019-11-05 17:03:03
+# @modify date 2019-11-21 18:09:10
+# @desc [Snake pipeline for eCLIP seq data analysis]
+
+SNAKEMAKE_FILE_DIR = config['SCRIPTS_DIR']
+PROJECT_DIR = config['PROJECT_DIR']
+GENOME = config['genome']
+SAMPLES = config['samples']
+T2G = config[GENOME]['t2g']
+GENE_NAME = config[GENOME]['gene_name']
+GTF_PATH = config[GENOME]['gtf']
+READ_LENGTH = config['read_length']
+rRNA_MASK = config[GENOME]['rmask']
+GROUPS = config['groups']
+REPETITIVE = config[GENOME]['repetitive']
+BINDING_SCORE = config[GENOME]['binding_score']
+CHR_SIZE = config[GENOME]['chr_size']
+TCGA_PRJ=config['tcga_prj']
+VCF_DIR=config['source_vcf']
+VCF_FILE_INFO=config['vcf_file_info']
+CLINICAL_DATA=config['clinical_data']
+CLINVAR_VCF=config['clinvar_vcf']
+START_OVER=config['re_intersect_clinvar']
+SUMMARY = config['SUMMARY']
+CONFIG = config['CONFIG']
+
+rule all:
+    input:
+        "{project_dir}/summary/".format(project_dir=PROJECT_DIR) + SUMMARY
+        
+rule summary:
+    input:
+        ["{project_dir}/kallisto/{sample_name}/abundance.tsv".format(
+            project_dir=PROJECT_DIR, sample_name=x) for x in SAMPLES],
+        ["{project_dir}/star/{sample_name}/mapping_stats.txt".format(
+            project_dir=PROJECT_DIR, sample_name=x) for x in SAMPLES],
+        ["{project_dir}/clam/{sample_name}/realigned.sorted.bam".format(
+            project_dir=PROJECT_DIR, sample_name=x) for x in SAMPLES],
+        ["{project_dir}/bigwig/{sample_name}/{sample_name}_multi_minus.bw".format(
+            project_dir=PROJECT_DIR, sample_name=x) for x in SAMPLES],
+        ["{project_dir}/clam/peaks/{group_name}/narrow_peak.combined.bed".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        ["{project_dir}/clam/peaks/{group_name}/narrow_peak.unique.bed".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        ["{project_dir}/clam/peaks/{group_name}/annotate.txt".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        ["{project_dir}/homer/{group_name}/homerResults.html".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        ["{project_dir}/clam/peaks/{group_name}/annotate_rep_foo.txt".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        ["{project_dir}/homer_alu/{group_name}/homerResults.html".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        ["{project_dir}/clam/peaks/{group_name}/narrow_peak.combined.binding_score.bed".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        ["{project_dir}/clam/peaks/{group_name}/narrow_peak.alu.binding_score.bed".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        # Call peaks seperately
+        ["{project_dir}/clam/peaks_sep/{group_name}/rep1/narrow_peak.combined.bed".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        ["{project_dir}/clam/peaks_sep/{group_name}/rep2/narrow_peak.combined.bed".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        ["{project_dir}/clam/peaks_sep/{group_name}/rep1/narrow_peak.unique.bed".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        ["{project_dir}/homer_sep/{group_name}/rep1/homerResults.html".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        ["{project_dir}/homer_sep/{group_name}/rep2/homerResults.html".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        
+        # Mutation analysis
+        ["{project_dir}/mutation/map/{cancer}/mutation_count.bigwig".format(
+            project_dir=PROJECT_DIR, cancer=x) for x in TCGA_PRJ],
+        ["{project_dir}/mutation/count/{group_name}/foo.txt".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        ["{project_dir}/mutation/count/{group_name}/alu_foo.txt".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        "{project_dir}/mutation/clinvar/foo.txt".format(
+                    project_dir=PROJECT_DIR),
+        ["{project_dir}/mutation/survival/full/{group_name}_significant.txt".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        ["{project_dir}/mutation/survival/alu/{group_name}_significant.txt".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        ["{project_dir}/clam/peaks/{group_name}/narrow_peak.combined.bw".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        ["{project_dir}/clam/peaks/{group_name}/narrow_peak.unique.bw".format(
+            project_dir=PROJECT_DIR, group_name=x) for x in GROUPS],
+        
+
+    output:
+        "{project_dir}/summary/"+SUMMARY
+    params:
+        config_file = CONFIG,
+        script=SNAKEMAKE_FILE_DIR+'/scripts/report/report_eclip.py'
+    log:
+        "{project_dir}/logs/summary.log"
+    shell:
+        'python {params.script} {params.config_file} {output} >{log} 2>&1'
+
+# rule archive_fq:
+#     input:
+#         first = "{project_dir}/fq_reads/{sample_name}_R1.fastq",
+#         second = "{project_dir}/fq_reads/{sample_name}_R2.fastq"
+#     output:
+#         first = "{project_dir}/fq_archive/{sample_name}_R1.fastq.gz",
+#         second = "{project_dir}/fq_archive/{sample_name}_R2.fastq.gz"
+#     params:
+#         name = "{sample_name}",
+#         output_dir = "{project_dir}/fq_cutadapt"
+#     log:
+#         "{project_dir}/logs/archive_fq/{sample_name}.log"
+#     shell:
+#         """
+# gzip -c -f {input.first} > {output.first}
+# gzip -c -f {input.second} > {output.second}
+# echo `date` > {log}
+#         """
+
+
+rule unzip_fq:
+    input:
+        first = "{project_dir}/fq_archive/{sample_name}_R1.fastq.gz",
+        second = "{project_dir}/fq_archive/{sample_name}_R2.fastq.gz"
+    output:
+        first = temp("{project_dir}/fq_reads/{sample_name}_R1.fastq"),
+        second = temp("{project_dir}/fq_reads/{sample_name}_R2.fastq")
+    params:
+        name = "{sample_name}",
+        output_dir = "{project_dir}/fq_cutadapt"
+    log:
+        "{project_dir}/logs/archive_fq/{sample_name}.log"
+    shell:
+        """
+gzip -c -d {input.first} > {output.first}
+gzip -c -d {input.second} > {output.second}
+echo `date` > {log}
+        """
+
+
+rule cutadapt:
+    input:
+        first = "{project_dir}/fq_reads/{sample_name}_R1.fastq",
+        second = "{project_dir}/fq_reads/{sample_name}_R2.fastq"
+    output:
+        first = temp("{project_dir}/fq_cutadapt/{sample_name}_R1.adapterTrim.round2.fastq"),
+        second = temp("{project_dir}/fq_cutadapt/{sample_name}_R2.adapterTrim.round2.fastq")
+    params:
+        name = "{sample_name}",
+        output_dir = "{project_dir}/fq_cutadapt"
+    log:
+        "{project_dir}/logs/cutadapt/{sample_name}.log"
+    shell:
+        """
+cutadapt -f fastq --match-read-wildcards --times 1 -e 0.1 -O 1 --quality-cutoff 6 -m 18 \
+-a NNNNNAGATCGGAAGAGCACACGTCTGAACTCCAGTCAC -g CTTCCGATCTACAAGTT -g CTTCCGATCTTGGTCCT \
+-A AACTTGTAGATCGGA -A AGGACCAAGATCGGA -A ACTTGTAGATCGGAA -A GGACCAAGATCGGAA \
+-A CTTGTAGATCGGAAG -A GACCAAGATCGGAAG -A TTGTAGATCGGAAGA -A ACCAAGATCGGAAGA \
+-A TGTAGATCGGAAGAG -A CCAAGATCGGAAGAG -A GTAGATCGGAAGAGC -A CAAGATCGGAAGAGC \
+-A TAGATCGGAAGAGCG -A AAGATCGGAAGAGCG -A AGATCGGAAGAGCGT -A GATCGGAAGAGCGTC \
+-A ATCGGAAGAGCGTCG -A TCGGAAGAGCGTCGT -A CGGAAGAGCGTCGTG -A GGAAGAGCGTCGTGT \
+-o {params.output_dir}/{params.name}_R1.adapterTrim.fastq -p {params.output_dir}/{params.name}_R2.adapterTrim.fastq \
+{input.first} {input.second} > {log} 2>&1
+cutadapt -f fastq --match-read-wildcards --times 1 -e 0.1 -O 5 --quality-cutoff 6 -m 18 \
+-A AACTTGTAGATCGGA -A AGGACCAAGATCGGA \
+-A ACTTGTAGATCGGAA -A GGACCAAGATCGGAA -A CTTGTAGATCGGAAG -A GACCAAGATCGGAAG \
+-A TTGTAGATCGGAAGA -A ACCAAGATCGGAAGA -A TGTAGATCGGAAGAG \
+-A CCAAGATCGGAAGAG -A GTAGATCGGAAGAGC -A CAAGATCGGAAGAGC -A TAGATCGGAAGAGCG \
+-A AAGATCGGAAGAGCG -A AGATCGGAAGAGCGT -A GATCGGAAGAGCGTC \
+-A ATCGGAAGAGCGTCG -A TCGGAAGAGCGTCGT -A CGGAAGAGCGTCGTG -A GGAAGAGCGTCGTGT \
+-o {params.output_dir}/{params.name}_R1.adapterTrim.round2.fastq -p {params.output_dir}/{params.name}_R2.adapterTrim.round2.fastq \
+{params.output_dir}/{params.name}_R1.adapterTrim.fastq {params.output_dir}/{params.name}_R2.adapterTrim.fastq > {log} 2>&1
+rm {params.output_dir}/{params.name}_R1.adapterTrim.fastq
+rm {params.output_dir}/{params.name}_R2.adapterTrim.fastq
+        """
+
+rule fastqc:
+    input:
+        first = "{project_dir}/fq_cutadapt/{sample_name}_R1.adapterTrim.round2.fastq",
+        second = "{project_dir}/fq_cutadapt/{sample_name}_R2.adapterTrim.round2.fastq"
+    output:
+        first = "{project_dir}/fastqc/{sample_name}_R1.adapterTrim.round2_fastqc.zip",
+        second = "{project_dir}/fastqc/{sample_name}_R2.adapterTrim.round2_fastqc.zip"
+    params:
+        out_dir = "{project_dir}/fastqc"
+    log:
+        "{project_dir}/logs/fastqc/{sample_name}.log"
+    shell:
+        """
+        fastqc -o {params.out_dir} {input.first} > {log} 2>&1
+        fastqc -o {params.out_dir} {input.second} >> {log} 2>&1
+        """
+
+rule kallisto_quant:
+    input:
+        first = "{project_dir}/fq_cutadapt/{sample_name}_R1.adapterTrim.round2.fastq",
+        second = "{project_dir}/fq_cutadapt/{sample_name}_R2.adapterTrim.round2.fastq"
+    output:
+        "{project_dir}/kallisto/{sample_name}/abundance.tsv"
+    log:
+        "{project_dir}/logs/kallisto/{sample_name}.log"
+    params:
+        reads = "{project_dir}/fq_cutadapt/{sample_name}",
+        outdir = "{project_dir}/kallisto/{sample_name}",
+        index = config[GENOME]['kallisto_idx'],
+        out_log = "{project_dir}/kallisto/foo.txt"
+    threads: 5
+    shell:
+        """
+        kallisto quant -t {threads} -i {params.index} -o {params.outdir}/ {params.reads}_R1.adapterTrim.round2.fastq {params.reads}_R2.adapterTrim.round2.fastq > {log} 2>&1
+        echo '{input} complete' >> {params.out_log}
+        """
+
+rule star_map:
+    input:
+        first = "{project_dir}/fq_cutadapt/{sample_name}_R1.adapterTrim.round2.fastq",
+        second = "{project_dir}/fq_cutadapt/{sample_name}_R2.adapterTrim.round2.fastq"
+    output:
+        "{project_dir}/star/{sample_name}/Aligned.out.bam"
+    log:
+        "{project_dir}/logs/star/{sample_name}.log"
+    params:
+        reads = "{project_dir}/fq_cutadapt/{sample_name}",
+        prefix = "{project_dir}/star/{sample_name}",
+        index = config[GENOME]['star_idx'],
+        max_hits = 100
+    threads: 10
+    shell:
+        """
+        STAR --genomeDir {params.index} \
+        --readFilesIn {params.reads}_R1.adapterTrim.round2.fastq {params.reads}_R2.adapterTrim.round2.fastq  --outSAMtype BAM Unsorted \
+        --outFileNamePrefix {params.prefix}/ \
+        --outFilterMultimapNmax {params.max_hits} \
+        --runThreadN {threads} \
+        --alignEndsProtrude 15 ConcordantPair \
+        --twopassMode Basic --limitOutSJcollapsed 2000000 \
+        --outStd Log > {log} 2>&1
+        """
+
+rule mapping_stat:
+    input:
+        align = "{project_dir}/star/{sample_name}/Aligned.out.bam",
+        script = SNAKEMAKE_FILE_DIR + '/scripts/report/mapping_stat.py',
+        qc_zip='{project_dir}/fastqc/{sample_name}_R1.adapterTrim.round2_fastqc.zip'
+    output:
+        "{project_dir}/star/{sample_name}/mapping_stats.txt"
+    log:
+        "{project_dir}/logs/star/{sample_name}.mapping_stats.log"
+    shell:
+        "python {input.script} {input.align} {input.qc_zip}> {output}"
+
+rule mask_rRNA:
+    input:
+        "{project_dir}/star/{sample_name}/Aligned.out.bam"
+    output:
+        "{project_dir}/star/{sample_name}/Aligned.out.mask_rRNA.bam"
+    params:
+        rRNA_annotation = rRNA_MASK
+    log:
+        "{project_dir}/logs/star/{sample_name}.mask_rna.log"
+    shell:
+        '''
+        bedtools intersect -f 0.90 -abam {input} -b {params.rRNA_annotation} -v > {output}
+        '''
+
+rule collapse_dup:
+    input:
+        "{project_dir}/star/{sample_name}/Aligned.out.mask_rRNA.bam"
+    output:
+        "{project_dir}/star/{sample_name}/Aligned.out.mask_rRNA.dup_removed.bam"
+    params:
+        metric = "{project_dir}/star/{sample_name}/dup_removal.metrics.txt",
+        script = SNAKEMAKE_FILE_DIR+'/scripts/prepare_reads/collapse_pcr.py'
+    log:
+        "{project_dir}/logs/star/{sample_name}.clps_dup.log"
+    shell:
+        '''
+        python {params.script} -b {input} -o {output} -m {params.metric} > {log} 2>&1
+        '''
+
+rule clam_preprocess:
+    input:
+        "{project_dir}/star/{sample_name}/Aligned.out.mask_rRNA.dup_removed.bam"
+    output:
+        "{project_dir}/clam/{sample_name}/multi.sorted.bam", "{project_dir}/clam/{sample_name}/unique.sorted.bam"
+    params:
+        out_dir = "{project_dir}/clam/{sample_name}"
+    log:
+        "{project_dir}/logs/clam/{sample_name}.preprocess.log"
+    shell:
+        '''
+        CLAM preprocessor -i {input} -o {params.out_dir} --read-tagger-method start --strandness opposite> {log} 2>&1
+        '''
+
+rule clam_realign:
+    input:
+        "{project_dir}/clam/{sample_name}/multi.sorted.bam", "{project_dir}/clam/{sample_name}/unique.sorted.bam"
+    output:
+        "{project_dir}/clam/{sample_name}/realigned.sorted.bam"
+    params:
+        input_dir = "{project_dir}/clam/{sample_name}"
+    log:
+        "{project_dir}/logs/clam/{sample_name}.realign.log"
+    shell:
+        '''
+        CLAM realigner -i {params.input_dir}/ -o {params.input_dir} --winsize 50 --max-tags -1 --read-tagger-method start  --strandness opposite > {log} 2>&1
+        '''
+
+rule make_read_signal_bw:
+    input:
+        rb="{project_dir}/clam/{sample_name}/realigned.sorted.bam", ub="{project_dir}/clam/{sample_name}/unique.sorted.bam"
+    output:
+        "{project_dir}/bigwig/{sample_name}/{sample_name}_multi_minus.bw","{project_dir}/bigwig/{sample_name}/{sample_name}_multi_plus.bw",
+        "{project_dir}/bigwig/{sample_name}/{sample_name}_unique_minus.bw","{project_dir}/bigwig/{sample_name}/{sample_name}_unique_plus.bw"
+    params:
+        script = SNAKEMAKE_FILE_DIR + '/scripts/make_bw/pileup_realigned_reads.py',
+        sample_name=lambda wildcards:wildcards.sample_name,
+        output_dir="{project_dir}/bigwig/{sample_name}",
+        chr_size=CHR_SIZE,
+        gtf_path=GTF_PATH,
+        threads=20
+    log:
+        "{project_dir}/logs/bigwig/{sample_name}.signal.bigwig.log"
+    shell:
+        '''
+        python {params.script} -s {params.sample_name} --ub {input.ub} --rb {input.rb} --uo True -g {params.gtf_path} \
+        -c {params.chr_size} -t {params.threads} -o {params.output_dir}
+        python {params.script} -s {params.sample_name} --ub {input.ub} --rb {input.rb} -g {params.gtf_path} \
+        -c {params.chr_size} -t {params.threads} -o {params.output_dir}
+        '''
+
+########################################################################################################################
+##                   This section include codes for calling combined peaks with multi-replicate mode,                 ##
+##                               annotated to repetitve regions and motifs were extracted                             ##
+########################################################################################################################
+rule clam_call_peak:
+    input:
+        input_unique_samples = lambda wildcards:
+            expand("{project_dir}/clam/{input_sample}/unique.sorted.bam", project_dir=PROJECT_DIR,
+                   input_sample=config['groups'][wildcards.group_name]['input']),
+        input_multi_samples = lambda wildcards:
+            expand("{project_dir}/clam/{input_sample}/realigned.sorted.bam", project_dir=PROJECT_DIR,
+                   input_sample=config['groups'][wildcards.group_name]['input']),
+        ip_unique_samples = lambda wildcards:
+            expand("{project_dir}/clam/{input_sample}/unique.sorted.bam", project_dir=PROJECT_DIR,
+                   input_sample=config['groups'][wildcards.group_name]['ip']),
+        ip_multi_samples = lambda wildcards:
+            expand("{project_dir}/clam/{input_sample}/realigned.sorted.bam", project_dir=PROJECT_DIR,
+                   input_sample=config['groups'][wildcards.group_name]['ip'])
+    output:
+        "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined.bed"
+    params:
+        input_unique_samples = lambda wildcards:
+            ','.join(expand("{project_dir}/clam/{input_sample}/unique.sorted.bam", project_dir=PROJECT_DIR,
+                            input_sample=config['groups'][wildcards.group_name]['input'])),
+        input_multi_samples = lambda wildcards:
+            ','.join(expand("{project_dir}/clam/{input_sample}/realigned.sorted.bam", project_dir=PROJECT_DIR,
+                            input_sample=config['groups'][wildcards.group_name]['input'])),
+        ip_unique_samples = lambda wildcards:
+            ','.join(expand("{project_dir}/clam/{input_sample}/unique.sorted.bam", project_dir=PROJECT_DIR,
+                            input_sample=config['groups'][wildcards.group_name]['ip'])),
+        ip_multi_samples = lambda wildcards:
+            ','.join(expand("{project_dir}/clam/{input_sample}/realigned.sorted.bam", project_dir=PROJECT_DIR,
+                            input_sample=config['groups'][wildcards.group_name]['ip'])),
+        gtf_path = GTF_PATH,
+        q_value_cut = 0.05,
+        fold_change = '0.69',  # log(5)
+        threads = 20,
+        output_dir = '{project_dir}/clam/peaks/{group_name}'
+    log:
+        "{project_dir}/logs/clam/{group_name}.call_peak.log"
+    shell:
+        '''
+CLAM peakcaller -i {params.ip_unique_samples} {params.ip_multi_samples} \
+-c {params.input_unique_samples} {params.input_multi_samples} \
+-o {params.output_dir}  --binsize 50 \
+--gtf {params.gtf_path} -p {params.threads} > {log} 2>&1
+mv {output} {output}.all
+awk '$9<{params.q_value_cut} && $7>{params.fold_change}' {output}.all > {output}
+        '''
+
+rule clam_call_peak_unique:
+    input:
+        input_unique_samples = lambda wildcards:
+            expand("{project_dir}/clam/{input_sample}/unique.sorted.bam", project_dir=PROJECT_DIR,
+                   input_sample=config['groups'][wildcards.group_name]['input']),
+        ip_unique_samples = lambda wildcards:
+            expand("{project_dir}/clam/{input_sample}/unique.sorted.bam", project_dir=PROJECT_DIR,
+                   input_sample=config['groups'][wildcards.group_name]['ip']),
+
+    output:
+        "{project_dir}/clam/peaks/{group_name}/narrow_peak.unique.bed"
+    params:
+        input_unique_samples = lambda wildcards:
+            ','.join(expand("{project_dir}/clam/{input_sample}/unique.sorted.bam", project_dir=PROJECT_DIR,
+                            input_sample=config['groups'][wildcards.group_name]['input'])),
+        ip_unique_samples = lambda wildcards:
+            ','.join(expand("{project_dir}/clam/{input_sample}/unique.sorted.bam", project_dir=PROJECT_DIR,
+                            input_sample=config['groups'][wildcards.group_name]['ip'])),
+        gtf_path = GTF_PATH,
+        q_value_cut = 0.05,
+        fold_change = '0.69',  # log(2)
+        threads = 20,
+        output_dir = '{project_dir}/clam/peaks/{group_name}'
+    log:
+        "{project_dir}/logs/clam/{group_name}.call_peak.log"
+    shell:
+        '''
+CLAM peakcaller -i {params.ip_unique_samples} \
+-c {params.input_unique_samples} \
+-o {params.output_dir}  --binsize 50 \
+--gtf {params.gtf_path} -p {params.threads} -u > {log} 2>&1
+mv {output} {output}.all
+awk '$9<{params.q_value_cut} && $7>{params.fold_change}' {output}.all > {output}
+        '''
+
+rule make_peak_bw:
+    input:
+        "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined.bed"
+    output:
+        "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined.bw"
+    params:
+        script = SNAKEMAKE_FILE_DIR + "/scripts/peakComposition/remove_overlap_in_bedgraph.py",
+        genome_file = CHR_SIZE,
+        
+        workdir="{project_dir}/clam/peaks/{group_name}",
+        prj_dir="{project_dir}"
+
+    shell:
+        """
+        cd {params.workdir}
+        awk '{{printf "%s\\t%d\\t%d\\t%2.3f\\n" , $1,$2,$3,$7}}' narrow_peak.combined.bed > narrow_peak.combined.bedgraph
+        sort -k1,1 -k2,2n narrow_peak.combined.bedgraph > narrow_peak.combined.sorted.bedgraph
+        python {params.script} narrow_peak.combined.sorted.bedgraph narrow_peak.combined.sorted.no_overlap.bedgraph
+        bedGraphToBigWig  narrow_peak.combined.sorted.no_overlap.bedgraph {params.genome_file}  narrow_peak.combined.bw
+        rm narrow_peak.combined.bedgraph
+        rm narrow_peak.combined.sorted.bedgraph
+        rm narrow_peak.combined.sorted.no_overlap.bedgraph
+        """
+
+rule make_unique_peak_bw:
+    input:
+        "{project_dir}/clam/peaks/{group_name}/narrow_peak.unique.bed"
+    output:
+        "{project_dir}/clam/peaks/{group_name}/narrow_peak.unique.bw"
+    params:
+        script = SNAKEMAKE_FILE_DIR + "/scripts/peakComposition/remove_overlap_in_bedgraph.py",
+        genome_file = CHR_SIZE,
+        workdir="{project_dir}/clam/peaks/{group_name}",
+        prj_dir="{project_dir}"
+
+    shell:
+        """
+        cd {params.workdir}
+        awk '{{printf "%s\\t%d\\t%d\\t%2.3f\\n" , $1,$2,$3,$7}}' narrow_peak.unique.bed > narrow_peak.unique.bedgraph
+        sort -k1,1 -k2,2n narrow_peak.unique.bedgraph > narrow_peak.unique.sorted.bedgraph
+        python {params.script} narrow_peak.unique.sorted.bedgraph narrow_peak.unique.sorted.no_overlap.bedgraph
+        bedGraphToBigWig  narrow_peak.unique.sorted.no_overlap.bedgraph {params.genome_file}  narrow_peak.unique.bw
+        rm narrow_peak.unique.bedgraph
+        rm narrow_peak.unique.sorted.bedgraph
+        rm narrow_peak.unique.sorted.no_overlap.bedgraph
+        """
+
+rule annotate_repetitive:
+    input:
+        "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined.bed"
+    output:
+        "{project_dir}/clam/peaks/{group_name}/annotate_rep_foo.txt","{project_dir}/clam/peaks/{group_name}/peak_hg19_alu.bed"
+        # output_bed=lambda wildcards: 
+        #     expand("{project_dir}/clam/peaks/{group_name}/peak_{rep_name}.bed",project_dir=PROJECT_DIR,group_name=wildcards.group_name,
+        #     rep_name=[x.split('/')[-1].split('.')[0] for x in REPETITIVE])
+    params:
+        rep_bed =REPETITIVE,
+        output_prefix = '{project_dir}/clam/peaks/{group_name}/peak',
+        script = SNAKEMAKE_FILE_DIR + '/scripts/peakComposition/extract_repetitive_peaks.py',
+        strandness = config['genomic_region']['strandness']
+    log:
+        "{project_dir}/logs/clam/{group_name}.repetitive.log"
+    run:
+        import subprocess
+        for repetitive_region in params['rep_bed']:
+            strandness=params['strandness']
+            subprocess.call(
+                'python {} {} {} {} {} >{} 2>&1 '.format(
+                    params['script'], input[0], params['output_prefix'], str(strandness), repetitive_region, log[0]),
+                shell=True)
+        subprocess.call('echo `date` > {} '.format(output[0]),shell=True)
+        subprocess.call(
+            "echo 'anotated repetitive files: {}' >> {}" .format(' '.join(params['rep_bed']),output[0]),shell=True)
+
+rule clam_annotate:
+    input:
+        "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined.bed"
+    output:
+        "{project_dir}/clam/peaks/{group_name}/annotate.txt"
+    params:
+        genome = GENOME
+    log:
+        "{project_dir}/logs/clam/{group_name}.annotate.log"
+    shell:
+        '''
+        CLAM peak_annotator -i {input} -g {params.genome} -o {output}
+        '''
+
+rule homer_motif:
+    input:
+        "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined.bed"
+    output:
+        "{project_dir}/homer/{group_name}/homerResults.html"
+    params:
+        outdir = "{project_dir}/homer/{group_name}",
+        motif_len = '5,6,7',
+        genome = GENOME,
+        nthread = 10,
+        size = 100,
+        motif_num = 10
+    log:
+        "{project_dir}/logs/homer/{group_name}.log"
+    shell:
+        "findMotifsGenome.pl {input} {params.genome} {params.outdir} "\
+            " -rna -len {params.motif_len} "\
+            "-p {params.nthread} -size {params.size} -S {params.motif_num} > {log} 2>&1"
+
+
+rule homer_motif_alu:
+    input:
+        "{project_dir}/clam/peaks/{group_name}/annotate_rep_foo.txt"
+    output:
+        "{project_dir}/homer_alu/{group_name}/homerResults.html"
+    params:
+        outdir = "{project_dir}/homer_alu/{group_name}",
+        input_file = "{project_dir}/clam/peaks/{group_name}/peak_hg19_alu.bed",
+        motif_len = '5,6,7',
+        genome = GENOME,
+        nthread = 10,
+        size = 100,
+        motif_num = 10
+    log:
+        "{project_dir}/logs/homer/{group_name}.log"
+    run:
+        import os
+        import subprocess
+        print(log[0])
+        print(output[0])
+        print(params.input_file)
+        process = subprocess.Popen(
+            'wc -l ' + params.input_file, shell=True, stdout=subprocess.PIPE)
+        out = process.communicate()[0]
+        out = out.decode('utf-8').split(' ')[0]
+        print(out)
+        if int(str(out.strip())) < 1:
+            subprocess.call("echo '' > "+output[0], shell=True)
+            subprocess.call(
+                "echo 'No peak in input file' > "+log[0], shell=True)
+        else:
+            cmd = "findMotifsGenome.pl {input_file} {genome} {outdir} "\
+                " -rna -len {motif_len} "\
+                "-p {nthread} -size {size} -S {motif_num} > {log} 2>&1".format(input_file=params.input_file, genome=params.genome, outdir=params.outdir,
+                                                                               motif_len=params.motif_len, nthread=params.nthread, size=params.size, motif_num=params.motif_num, log=log[0])
+            subprocess.call(cmd, shell=True)
+
+
+rule extract_binding_score:
+    input:
+        "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined.bed"
+    output:
+        "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined.binding_score.bed"
+    params:
+        binding_score_plus = BINDING_SCORE + '/{group_name}_plus.sorted.bw',
+        binding_score_minus = BINDING_SCORE + '/{group_name}_minus.sorted.bw',
+        kallisto_files = "{project_dir}/kallisto/{group_name}_Inp_rep1/abundance.tsv",
+        script = SNAKEMAKE_FILE_DIR + \
+            '/scripts/peakComposition/extract_predicted_scores_on_peak.py',
+        project_dir = PROJECT_DIR
+    log:
+        "{project_dir}/logs/binding_score/{group_name}.log"
+    shell:
+        """
+        python {params.script} {input} {params.binding_score_plus} {params.binding_score_minus} {output} {params.kallisto_files}  > {log} 2>&1
+        """
+rule extract_alu_binding_score:
+    input:
+        "{project_dir}/clam/peaks/{group_name}/annotate_rep_foo.txt"
+    output:
+        "{project_dir}/clam/peaks/{group_name}/narrow_peak.alu.binding_score.bed"
+    params:
+        binding_score_plus = BINDING_SCORE + '/{group_name}_plus.sorted.bw',
+        binding_score_minus = BINDING_SCORE + '/{group_name}_minus.sorted.bw',
+        kallisto_files = "{project_dir}/kallisto/{group_name}_Inp_rep1/abundance.tsv",
+        script = SNAKEMAKE_FILE_DIR + \
+            '/scripts/peakComposition/extract_predicted_scores_on_peak.py',
+        project_dir = PROJECT_DIR,
+        alu_peak_bed = '{project_dir}/clam/peaks/{group_name}/peak_' + \
+            config[GENOME]['alu_repetitive']
+    log:
+        "{project_dir}/logs/binding_score/{group_name}.log"
+    shell:
+        """
+        python {params.script} {params.alu_peak_bed} {params.binding_score_plus} {params.binding_score_minus} {output} {params.kallisto_files}  > {log} 2>&1
+        """
+
+rule topology_dist:
+    input:
+        "{project_dir}/clam/peaks/{group_name}/annotate_rep_foo.txt"
+    output:
+        "{project_dir}/clam/peaks/{group_name}/dist.data"
+    log:
+        "{project_dir}/logs/topology/{group_name}.log"
+    params:
+        outdir = "{project_dir}/clam/peaks/{group_name}",
+        alu_peak_bed = '{project_dir}/clam/peaks/{group_name}/peak_' + \
+            config[GENOME]['alu_repetitive'],
+        full_peak = "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined.bed",
+        count_script = SNAKEMAKE_FILE_DIR + \
+            "/scripts/topological_dist/Peak_distribution_on_utr_cds.py",
+        genome = GENOME,
+        binnum = 50
+    run:
+        import os
+        import subprocess
+        process = subprocess.Popen(
+            'wc -l ' + params.alu_peak_bed, shell=True, stdout=subprocess.PIPE)
+        out = process.communicate()[0]
+        out = out.decode('utf-8').split(' ')[0]
+        print(out)
+        if int(str(out.strip())) < 1:
+            subprocess.call("echo '' > "+output[0], shell=True)
+            subprocess.call(
+                "echo 'No peak in input file' > "+log[0], shell=True)
+        else:
+            cmd = "python {count_script} {alu_peak_bed} {genome} {binnum} >{outdir}/dist_alu.data 2>{log}".format(
+                count_script=params.count_script, alu_peak_bed=params.alu_peak_bed, genome=params.genome, binnum=params.binnum, outdir=params.outdir, log=log[0])
+            subprocess.call(cmd, shell=True)
+            cmd2="python {count_script} {full_peak} {genome} {binnum} >{outdir}/dist.data 2>{log}".format(
+                count_script=params.count_script, full_peak=params.full_peak, genome=params.genome, binnum=params.binnum, outdir=params.outdir, log=log[0])
+            subprocess.call(cmd2, shell=True)
+
+rule extract_nearby_bg:
+    input:
+        "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined.bed",
+    output:
+        up_bed="{project_dir}/clam/peaks/{group_name}/narrow_peak.combined_up_bg.bed",
+        down_bed = "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined_down_bg.bed",
+        up_alu = "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined_up_alu_bg.bed",
+        down_alu = "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined_down_alu_bg.bed"
+    params:
+        chr_size = CHR_SIZE,
+        script = SNAKEMAKE_FILE_DIR + '/scripts/peakComposition/peak_nearby_bg.py',
+        alu_peak_bed = '{project_dir}/clam/peaks/{group_name}/peak_' + \
+            config[GENOME]['alu_repetitive']
+    log:
+        "{project_dir}/logs/nearby_bg/{group_name}.log" 
+    shell:
+        """
+        python {params.script}  {input} {params.chr_size}> {log} 2>&1
+        bedtools intersect -s -u -wa -a {output.up_bed} -b {params.alu_peak_bed} > {output.up_alu}
+        bedtools intersect -s -u -wa -a {output.down_bed} -b {params.alu_peak_bed} > {output.down_alu}
+        """
+
+rule extract_nearby_bg_score:
+    input:
+        up_bed="{project_dir}/clam/peaks/{group_name}/narrow_peak.combined_up_bg.bed",
+        down_bed="{project_dir}/clam/peaks/{group_name}/narrow_peak.combined_down_bg.bed",
+        up_alu = "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined_up_alu_bg.bed",
+        down_alu = "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined_down_alu_bg.bed"
+    output:
+        up_score = "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined_up_bg_score.bed",
+        down_score = "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined_down_bg_score.bed",
+        up_alu_score = "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined_up_alu_bg_score.bed",
+        down_alu_score = "{project_dir}/clam/peaks/{group_name}/narrow_peak.combined_down_alu_bg_score.bed"
+    params:
+        binding_score_plus = BINDING_SCORE + '/{group_name}_plus.sorted.bw',
+        binding_score_minus = BINDING_SCORE + '/{group_name}_minus.sorted.bw',
+        script = SNAKEMAKE_FILE_DIR + \
+            '/scripts/peakComposition/extract_predicted_scores_on_peak.py',
+        project_dir = PROJECT_DIR
+    log:
+        "{project_dir}/logs/nearby_bg/{group_name}.log"  
+    shell:
+        """
+        python {params.script} {input.up_bed} {params.binding_score_plus} {params.binding_score_minus} {output.up_score} > {log} 2>&1
+        python {params.script} {input.down_bed} {params.binding_score_plus} {params.binding_score_minus} {output.down_score} >> {log} 2>&1
+        python {params.script} {input.up_alu} {params.binding_score_plus} {params.binding_score_minus} {output.up_alu_score} >> {log} 2>&1
+        python {params.script} {input.down_alu} {params.binding_score_plus} {params.binding_score_minus} {output.down_alu_score} >> {log} 2>&1
+        """
+
+# ########################################################################################################################
+# ##                   This section include codes for calling combined peaks without multi-replicate mode,              ##
+# ##                               annotated to repetitve regions and motifs were extracted                             ##
+# ########################################################################################################################
+rule clam_call_peak_seperate:
+    input:
+        input_unique_samples = lambda wildcards:
+            expand("{project_dir}/clam/{input_sample}/unique.sorted.bam", project_dir=PROJECT_DIR,
+                   input_sample=config['groups'][wildcards.group_name]['input']),
+        input_multi_samples = lambda wildcards:
+            expand("{project_dir}/clam/{input_sample}/realigned.sorted.bam", project_dir=PROJECT_DIR,
+                   input_sample=config['groups'][wildcards.group_name]['input']),
+        ip_unique_samples = lambda wildcards:
+            expand("{project_dir}/clam/{input_sample}/unique.sorted.bam", project_dir=PROJECT_DIR,
+                   input_sample=config['groups'][wildcards.group_name]['ip']),
+        ip_multi_samples = lambda wildcards:
+            expand("{project_dir}/clam/{input_sample}/realigned.sorted.bam", project_dir=PROJECT_DIR,
+                   input_sample=config['groups'][wildcards.group_name]['ip'])
+    output:
+        rep1 = "{project_dir}/clam/peaks_sep/{group_name}/rep1/narrow_peak.combined.bed",
+        rep2 = "{project_dir}/clam/peaks_sep/{group_name}/rep2/narrow_peak.combined.bed"
+    params:
+        input_unique_samples = lambda wildcards:
+            ','.join(expand("{project_dir}/clam/{input_sample}/unique.sorted.bam", project_dir=PROJECT_DIR,
+                            input_sample=config['groups'][wildcards.group_name]['input'])),
+        input_multi_samples = lambda wildcards:
+            ','.join(expand("{project_dir}/clam/{input_sample}/realigned.sorted.bam", project_dir=PROJECT_DIR,
+                            input_sample=config['groups'][wildcards.group_name]['input'])),
+
+        ip_unique_samples_rep1 = lambda wildcards:
+            "{project_dir}/clam/{input_sample}/unique.sorted.bam".format(project_dir=PROJECT_DIR,
+                                                                         input_sample=config['groups'][wildcards.group_name]['ip'][0]),
+        ip_multi_samples_rep1 = lambda wildcards:
+            "{project_dir}/clam/{input_sample}/realigned.sorted.bam".format(project_dir=PROJECT_DIR,
+                                                                            input_sample=config['groups'][wildcards.group_name]['ip'][0]),
+        ip_unique_samples_rep2 = lambda wildcards:
+            "{project_dir}/clam/{input_sample}/unique.sorted.bam".format(project_dir=PROJECT_DIR,
+                                                                         input_sample=config['groups'][wildcards.group_name]['ip'][1]),
+        ip_multi_samples_rep2 = lambda wildcards:
+            "{project_dir}/clam/{input_sample}/realigned.sorted.bam".format(project_dir=PROJECT_DIR,
+                                                                            input_sample=config['groups'][wildcards.group_name]['ip'][1]),
+        gtf_path = GTF_PATH,
+        q_value_cut = 0.05,
+        fold_change = '0.69',  # log(2)
+        threads = 20,
+        output_dir = '{project_dir}/clam/peaks_sep/{group_name}'
+    log:
+        "{project_dir}/logs/clam/{group_name}.call_peak_sep.log"
+    shell:
+        '''
+CLAM peakcaller -i {params.ip_unique_samples_rep1} {params.ip_multi_samples_rep1} \
+-c {params.input_unique_samples} {params.input_multi_samples} \
+-o {params.output_dir}/rep1 --unstranded --binsize 50 \
+--gtf {params.gtf_path} -p {params.threads} > {log} 2>&1
+mv {output.rep1} {output.rep1}.all
+awk '$9<{params.q_value_cut} && $7>{params.fold_change}' {output.rep1}.all > {output.rep1}
+
+CLAM peakcaller -i {params.ip_unique_samples_rep2} {params.ip_multi_samples_rep2} \
+-c {params.input_unique_samples} {params.input_multi_samples} \
+-o {params.output_dir}/rep2 --unstranded --binsize 50 \
+--gtf {params.gtf_path} -p {params.threads} > {log} 2>&1
+mv {output.rep2} {output.rep2}.all
+awk '$9<{params.q_value_cut} && $7>{params.fold_change}' {output.rep2}.all > {output.rep2}
+        '''
+
+
+rule clam_call_unique_peak_seperate:
+    input:
+        input_unique_samples = lambda wildcards:
+            expand("{project_dir}/clam/{input_sample}/unique.sorted.bam", project_dir=PROJECT_DIR,
+                   input_sample=config['groups'][wildcards.group_name]['input']),
+        ip_unique_samples = lambda wildcards:
+            expand("{project_dir}/clam/{input_sample}/unique.sorted.bam", project_dir=PROJECT_DIR,
+                   input_sample=config['groups'][wildcards.group_name]['ip']),
+    output:
+        rep1 = "{project_dir}/clam/peaks_sep/{group_name}/rep1/narrow_peak.unique.bed",
+        rep2 = "{project_dir}/clam/peaks_sep/{group_name}/rep2/narrow_peak.unique.bed"
+    params:
+        input_unique_samples = lambda wildcards:
+            ','.join(expand("{project_dir}/clam/{input_sample}/unique.sorted.bam", project_dir=PROJECT_DIR,
+                            input_sample=config['groups'][wildcards.group_name]['input'])),
+        ip_unique_samples_rep1 = lambda wildcards:
+            "{project_dir}/clam/{input_sample}/unique.sorted.bam".format(project_dir=PROJECT_DIR,
+                                                                         input_sample=config['groups'][wildcards.group_name]['ip'][0]),
+        ip_unique_samples_rep2 = lambda wildcards:
+            "{project_dir}/clam/{input_sample}/unique.sorted.bam".format(project_dir=PROJECT_DIR,
+                                                                         input_sample=config['groups'][wildcards.group_name]['ip'][1]),
+        gtf_path = GTF_PATH,
+        q_value_cut = 0.05,
+        fold_change = '0.69',  # log(2)
+        threads = 20,
+        output_dir = '{project_dir}/clam/peaks_sep/{group_name}'
+    log:
+        "{project_dir}/logs/clam/{group_name}.call_peak_sep.log"
+    shell:
+        '''
+CLAM peakcaller -i {params.ip_unique_samples_rep1} \
+-c {params.input_unique_samples} \
+-o {params.output_dir}/rep1 --binsize 50 \
+--gtf {params.gtf_path} -p {params.threads} -u > {log} 2>&1
+mv {output.rep1} {output.rep1}.all
+awk '$9<{params.q_value_cut} && $7>{params.fold_change}' {output.rep1}.all > {output.rep1}
+
+CLAM peakcaller -i {params.ip_unique_samples_rep2} \
+-c {params.input_unique_samples} \
+-o {params.output_dir}/rep2 --binsize 50 \
+--gtf {params.gtf_path} -p {params.threads} -u > {log} 2>&1
+mv {output.rep2} {output.rep2}.all
+awk '$9<{params.q_value_cut} && $7>{params.fold_change}' {output.rep2}.all > {output.rep2}
+        '''
+
+
+rule make_sep_peak_bw:
+    input:
+        rep1 = "{project_dir}/clam/peaks_sep/{group_name}/rep1/narrow_peak.combined.bed",
+        rep2 = "{project_dir}/clam/peaks_sep/{group_name}/rep2/narrow_peak.combined.bed"
+    output:
+        rep1 = "{project_dir}/clam/peaks_sep/{group_name}/rep1/narrow_peak.combined.bw",
+        rep2 = "{project_dir}/clam/peaks_sep/{group_name}/rep2/narrow_peak.combined.bw"
+    params:
+        script = SNAKEMAKE_FILE_DIR + "/scripts/peakComposition/remove_overlap_in_bedgraph.py",
+        genome_file = CHR_SIZE,
+        workdir="{project_dir}/clam/peaks_sep/{group_name}",
+        prj_dir="{project_dir}"
+
+    shell:
+        """
+        cd {params.workdir}/rep1
+        awk '{{printf "%s\\t%d\\t%d\\t%2.3f\\n" , $1,$2,$3,$7}}' narrow_peak.combined.bed > narrow_peak.combined.bedgraph
+        sort -k1,1 -k2,2n narrow_peak.combined.bedgraph > narrow_peak.combined.sorted.bedgraph
+        python {params.script} narrow_peak.combined.sorted.bedgraph narrow_peak.combined.sorted.no_overlap.bedgraph
+        bedGraphToBigWig  narrow_peak.combined.sorted.no_overlap.bedgraph {params.genome_file}  narrow_peak.combined.bw
+        rm narrow_peak.combined.bedgraph
+        rm narrow_peak.combined.sorted.bedgraph
+        rm narrow_peak.combined.sorted.no_overlap.bedgraph
+        cd {params.workdir}/rep2
+        awk '{{printf "%s\\t%d\\t%d\\t%2.3f\\n" , $1,$2,$3,$7}}' narrow_peak.combined.bed > narrow_peak.combined.bedgraph
+        sort -k1,1 -k2,2n narrow_peak.combined.bedgraph > narrow_peak.combined.sorted.bedgraph
+        python {params.script} narrow_peak.combined.sorted.bedgraph narrow_peak.combined.sorted.no_overlap.bedgraph
+        bedGraphToBigWig  narrow_peak.combined.sorted.no_overlap.bedgraph {params.genome_file}  narrow_peak.combined.bw
+        rm narrow_peak.combined.bedgraph
+        rm narrow_peak.combined.sorted.bedgraph
+        rm narrow_peak.combined.sorted.no_overlap.bedgraph
+        """
+
+rule make_sep_unique_peak_bw:
+    input:
+        rep1 = "{project_dir}/clam/peaks_sep/{group_name}/rep1/narrow_peak.unique.bed",
+        rep2 = "{project_dir}/clam/peaks_sep/{group_name}/rep2/narrow_peak.unique.bed"
+    output:
+        rep1 = "{project_dir}/clam/peaks_sep/{group_name}/rep1/narrow_peak.unique.bw",
+        rep2 = "{project_dir}/clam/peaks_sep/{group_name}/rep2/narrow_peak.unique.bw"
+    params:
+        script = SNAKEMAKE_FILE_DIR + "/scripts/peakComposition/remove_overlap_in_bedgraph.py",
+        genome_file = CHR_SIZE,
+        workdir="{project_dir}/clam/peaks_sep/{group_name}",
+        prj_dir="{project_dir}"
+
+    shell:
+        """
+        cd {params.workdir}/rep1
+        awk '{{printf "%s\\t%d\\t%d\\t%2.3f\\n" , $1,$2,$3,$7}}' narrow_peak.unique.bed > narrow_peak.unique.bedgraph
+        sort -k1,1 -k2,2n narrow_peak.unique.bedgraph > narrow_peak.unique.sorted.bedgraph
+        python {params.script} narrow_peak.unique.sorted.bedgraph narrow_peak.unique.sorted.no_overlap.bedgraph
+        bedGraphToBigWig  narrow_peak.unique.sorted.no_overlap.bedgraph {params.genome_file}  narrow_peak.unique.bw
+        rm narrow_peak.unique.bedgraph
+        rm narrow_peak.unique.sorted.bedgraph
+        rm narrow_peak.unique.sorted.no_overlap.bedgraph
+        cd {params.workdir}/rep2
+        awk '{{printf "%s\\t%d\\t%d\\t%2.3f\\n" , $1,$2,$3,$7}}' narrow_peak.unique.bed > narrow_peak.unique.bedgraph
+        sort -k1,1 -k2,2n narrow_peak.unique.bedgraph > narrow_peak.unique.sorted.bedgraph
+        python {params.script} narrow_peak.unique.sorted.bedgraph narrow_peak.unique.sorted.no_overlap.bedgraph
+        bedGraphToBigWig  narrow_peak.unique.sorted.no_overlap.bedgraph {params.genome_file}  narrow_peak.unique.bw
+        rm narrow_peak.unique.bedgraph
+        rm narrow_peak.unique.sorted.bedgraph
+        rm narrow_peak.unique.sorted.no_overlap.bedgraph
+        """
+
+
+rule homer_motif_sep:
+    input:
+        rep1 = "{project_dir}/clam/peaks_sep/{group_name}/rep1/narrow_peak.combined.bed",
+        rep2 = "{project_dir}/clam/peaks_sep/{group_name}/rep2/narrow_peak.combined.bed"
+    output:
+        rep1 = "{project_dir}/homer_sep/{group_name}/rep1/homerResults.html",
+        rep2 = "{project_dir}/homer_sep/{group_name}/rep2/homerResults.html"
+    params:
+        outdir_rep1 = "{project_dir}/homer_sep/{group_name}/rep1",
+        outdir_rep2 = "{project_dir}/homer_sep/{group_name}/rep2",
+        motif_len = '5,6,7',
+        genome = GENOME,
+        nthread = 10,
+        size = 100,
+        motif_num = 10
+    log:
+        "{project_dir}/logs/homer/{group_name}_sep.log"
+    shell:
+        """
+findMotifsGenome.pl {input.rep1} {params.genome} {params.outdir_rep1} \
+     -rna -len {params.motif_len} \
+    -p {params.nthread} -size {params.size} -S {params.motif_num} > {log} 2>&1
+findMotifsGenome.pl {input.rep2} {params.genome} {params.outdir_rep2} \
+    -rna -len {params.motif_len} \
+    -p {params.nthread} -size {params.size} -S {params.motif_num} > {log} 2>&1
+        """
+
+########################################################################################################################
+##                                                Mutation related analysis                                           ##
+########################################################################################################################
+
+rule creat_mutation_bigwig:
+    input:
+       GTF_PATH
+    output:
+        "{project_dir}/mutation/map/{cancer}/mutation_count.bigwig"
+    params:
+        script=SNAKEMAKE_FILE_DIR+'/scripts/tcga/generate_mutation_bigwig.py',
+        source_vcf=lambda wildcards: config['source_vcf']+'/{}/hg19'.format(wildcards.cancer),
+        recursive='-r',
+        output_dir= "{project_dir}/mutation/map/{cancer}",
+        cancer_type=lambda wildcards:wildcards.cancer,
+        genome=GENOME
+    log:
+        "{project_dir}/logs/mutation_bigwig/{cancer}.bigwig.log"
+    shell:
+        'python {params.script} -o {params.output_dir} -s {params.source_vcf} -t {params.cancer_type} -g {params.genome} {params.recursive} >{log} 2>&1'
+
+rule extract_peak_mutation_freq:
+    input:
+        peak="{project_dir}/clam/peaks/{group_name}/narrow_peak.combined.bed",
+        mutation_maps=["{}/mutation/map/{}/mutation_count.bigwig".format(PROJECT_DIR,x) for x in TCGA_PRJ]
+    output:
+        "{project_dir}/mutation/count/{group_name}/foo.txt"
+    params:
+        script=SNAKEMAKE_FILE_DIR+'/scripts/tcga/extract_peak_mutation_frequency.py',
+    log:
+        "{project_dir}/logs/mutation/{group_name}/peak.log"
+    run:
+        import subprocess
+        import os
+        for mutation_map in input['mutation_maps']:
+            cancer_type=mutation_map.split('/')[-2]
+            output_file=os.path.join(output[0].replace('/foo.txt',''),cancer_type+'.peak_mutation_count.bed')
+            subprocess.call('python {} -i {} -o {} -m {} >{} 2>&1'.format(
+                                                        params['script'],input['peak'],output_file,mutation_map,log[0]),shell=True)
+        subprocess.call('echo `date` > {}'.format(output[0]),shell=True)
+        
+
+rule extract_alu_peak_mutation_freq:
+    input:
+        peak="{project_dir}/clam/peaks/{group_name}/peak_hg19_alu.bed",
+        mutation_maps=["{}/mutation/map/{}/mutation_count.bigwig".format(PROJECT_DIR,x) for x in TCGA_PRJ]
+    output:
+        "{project_dir}/mutation/count/{group_name}/alu_foo.txt"
+    params:
+        script=SNAKEMAKE_FILE_DIR+'/scripts/tcga/extract_peak_mutation_frequency.py',
+    log:
+        "{project_dir}/logs/mutation/{group_name}/alu_peak.log"
+    run:
+        import subprocess
+        import os
+        for mutation_map in input['mutation_maps']:
+            cancer_type=mutation_map.split('/')[-2]
+            output_file=os.path.join(output[0].replace('/alu_foo.txt',''),cancer_type+'.alu_peak_mutation_count.bed')
+            subprocess.call('python {} -i {} -o {} -m {} >{} 2>&1'.format(
+                                                        params['script'],input['peak'],output_file,mutation_map,log[0]),shell=True)
+        subprocess.call('echo `date` > {}'.format(output[0]),shell=True)
+
+rule intersect_clinvar:
+    input:
+        peaks=lambda wildcards:
+                expand("{project_dir}/clam/peaks/{group_name}/narrow_peak.combined.bed",project_dir=wildcards.project_dir,group_name=GROUPS.keys())
+    output:
+        foo="{project_dir}/mutation/clinvar/foo.txt"
+    params:
+        clinvar_vcf=CLINVAR_VCF,
+        project_dir=PROJECT_DIR,
+        script=SNAKEMAKE_FILE_DIR+'/scripts/tcga/clinvar_enrichment.py',   
+        all_group=','.join(GROUPS.keys()),
+        start_over=START_OVER
+    log:
+        '{project_dir}/logs/mutation/clinvar_disease_count.log'
+    shell:
+        "python {params.script} {params.project_dir} {params.all_group} {params.clinvar_vcf} {params.start_over} > {log} 2>&1"
+
+rule tcga_survival:
+    input:
+        peak="{project_dir}/clam/peaks/{group_name}/narrow_peak.combined.bed",
+    output:
+        foo="{project_dir}/mutation/survival/full/{group_name}_significant.txt"
+    params:
+        script=SNAKEMAKE_FILE_DIR+'/scripts/tcga/generate_tcga_survival_data.py',   
+        vcf_file_info=VCF_FILE_INFO,
+        vcf_folder=VCF_DIR,
+        clinical_data=CLINICAL_DATA,
+        cancers=','.join(TCGA_PRJ),
+        outout_dir=PROJECT_DIR+'/mutation/survival/full'
+    log:
+        '{project_dir}/logs/mutation/{group_name}_survival.log'
+    shell:
+        """python {params.script} -f {params.vcf_file_info} -v {params.vcf_folder} -p {input.peak} -c {params.clinical_data} \
+         -t {params.cancers} -o {params.outout_dir} -T 35 -q -l > {log} """
+
+
+
+rule tcga_survival_alu:
+    input:
+        peak="{project_dir}/clam/peaks/{group_name}/peak_hg19_alu.bed",
+    output:
+        foo="{project_dir}/mutation/survival/alu/{group_name}_significant.txt"
+    params:
+        script=SNAKEMAKE_FILE_DIR+'/scripts/tcga/generate_tcga_survival_data.py',   
+        vcf_file_info=VCF_FILE_INFO,
+        vcf_folder=VCF_DIR,
+        clinical_data=CLINICAL_DATA,
+        cancers=','.join(TCGA_PRJ),
+        outout_dir=PROJECT_DIR+'/mutation/survival/alu'
+    log:
+        '{project_dir}/logs/mutation/{group_name}_alu_survival.log'
+    shell:
+        """python {params.script} -f {params.vcf_file_info} -v {params.vcf_folder} -p {input.peak} -c {params.clinical_data} \
+         -t {params.cancers} -o {params.outout_dir} -T 35 -q -l > {log} """
+
+# ########################################################################################################################
+# ##                                             Making read signal bigwig files                                        ##
+# ########################################################################################################################
+# rule sort_bam_files:
+#     input:
+#         "{project_dir}/star/{sample_name}/Aligned.out.mask_rRNA.dup_removed.bam"
+#     output:
+#         "{project_dir}/star/{sample_name}/Aligned.out.mask_rRNA.dup_removed.sorted.bam"
+#     params:
+#         path="{project_dir}/star/{sample_name}"
+#     shell:
+#         "samtools sort {params.path}/Aligned.out.mask_rRNA.dup_removed.bam -o {params.path}/Aligned.out.mask_rRNA.dup_removed.sorted.bam"
+
+# rule pileup_bam:
+#     input:
+#         sorted_bam_1="{project_dir}/star/{sample_name}/Aligned.out.mask_rRNA.dup_removed.sorted.bam",
+#     output:
+#         pileup_1="{project_dir}/bigwig/{sample_name}/pile_up.txt",
+#     shell:
+#         """samtools mpileup {input.sorted_bam_1} > {output.pileup_1}
+#         """
+
+# rule convert_pileup_wig:
+#     input:
+#         "{project_dir}/bigwig/{sample_name}/pile_up.txt"
+#     output:
+#         temp("{project_dir}/bigwig/{sample_name}/pile_up_plus.wig"),temp("{project_dir}/bigwig/{sample_name}/pile_up_minus.wig"),
+#     run:
+#         out_file_plus=open(output[0],'w')
+#         out_file_minus=open(output[1],'w')
+#         current_chr_plus=''
+#         current_chr_minus=''
+#         for line in open(input[0]):
+#             info=line.strip().split('\t')
+#             forward=info[4].count('.')+info[4].count('A')+info[4].count('G')+info[4].count('C')+info[4].count('T')
+#             reverse=info[4].count(',')+info[4].count('a')+info[4].count('g')+info[4].count('c')+info[4].count('t')
+#             if forward>0:
+#                 if not current_chr_plus==info[0]:
+#                     current_chr_plus=info[0]
+#                     out_file_plus.write('variableStep  chrom=%s\n'%info[0])
+#                 out_file_plus.write('%s\t%s\n'%(info[1],info[3]))
+#             if reverse>0:
+#                 if not current_chr_minus==info[0]:
+#                     current_chr_minus=info[0]
+#                     out_file_minus.write('variableStep  chrom=%s\n'%info[0])
+#                 out_file_minus.write('%s\t%s\n'%(info[1],info[3]))
+#         out_file_plus.close()
+#         out_file_minus.close()
+
+# rule convert_wig_bigwig:
+#     input:
+#         rep1="{project_dir}/bigwig/{sample_name}/pile_up_plus.wig",rep2="{project_dir}/bigwig/{sample_name}/pile_up_minus.wig",
+#     output:
+#         rep1="{project_dir}/bigwig/{sample_name}/read_signal_plus.bigwig",rep2="{project_dir}/bigwig/{sample_name}/read_signal_minus.bigwig"
+#     params:
+#         chr_size=CHR_SIZE
+#     shell:
+#         """\
+# wigToBigWig {input.rep1}  {params.chr_size} {output.rep1}
+# wigToBigWig {input.rep2}  {params.chr_size} {output.rep2}
+# """

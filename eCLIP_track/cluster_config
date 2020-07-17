@@ -1,0 +1,82 @@
+__default__:
+   h_data: 12G
+   threads: 1
+kallisto_indexing:
+  h_data: 40G
+  threads: 15
+star_indexing:
+   h_data: 50G
+   threads: 15
+star_map:
+   h_data: 35G
+   threads: 15
+star_map_1:
+   h_data: 35G
+   threads: 15
+star_map_2:
+   h_data: 35G
+   threads: 15
+collapse_dup:
+   h_data: 80G
+   threads: 15
+mask_rRNA:
+   h_data: 20G
+   threads: 15
+kallisto_quant:
+   h_data: 8G
+   threads: 15
+deg_call:
+   h_data: 8G
+   threads: 15
+clam_preprocess:
+   h_data: 36G
+   threads: 1
+clam_realign:
+   h_data: 100G
+   threads: 1
+clam_call_peak:
+   h_data: 36G
+   h_rt: 18:00:0
+   threads: 1
+clam_call_peak_seperate:
+   h_data: 36G
+   h_rt: 18:00:0
+   threads: 1
+clam_call_unique_peak_seperate:
+   h_data: 36G
+   h_rt: 18:00:0
+   threads: 1
+clam_call_peak_unique:
+   h_data: 36G
+   h_rt: 18:00:0
+   threads: 1
+filter_reads:
+   h_data: 40G
+   threads: 1
+extract_nearby_bg_score:
+   h_data: 20G
+   h_rt: 18:00:0
+   threads: 1
+extract_nearby_bg:
+   h_data: 20G
+   h_rt: 18:00:0
+   threads: 1
+summary:
+   h_data: 20G
+convert_vcf:
+   h_data: 100G
+creat_mutation_bigwig:
+   h_data: 20G
+tcga_survival_alu:
+   h_data: 60G
+tcga_survival:
+   h_data: 60G
+convert_wig_bigwig:
+  h_data: 60G
+sort_bam_files:
+  h_data: 30G
+pileup_bam:
+  h_data: 30G
+make_read_signal_bw:
+  h_data: 50G
+
